@@ -93,7 +93,7 @@ public static class ArenaBuilder
         GameObject stairs = new GameObject("RoofStairs");
         stairs.transform.SetParent(g, false);
         stairs.transform.localPosition = new Vector3(21.5f, 0f, -26.5f);
-        BuildFlight(stairs.transform, 0f, WallHeight + Thickness, true);
+        BuildFlight(stairs.transform, 0f, WallHeight + Thickness, true, -5.5f);
 
         float railY = WallHeight + Thickness + 0.5f;
         CreateBox("RoofRail_N", g, new Vector3(0f, railY, 29.8f), new Vector3(59.6f, 1f, 0.2f), CRail);
@@ -176,7 +176,9 @@ public static class ArenaBuilder
             float deckY = TowerHeight * f;
             float fromY = f == 1 ? 0f : TowerHeight * (f - 1) + Thickness * 0.5f;
             BuildDeck(level.transform, deckY);
-            BuildFlight(level.transform, fromY, deckY + Thickness * 0.5f, f == 1);
+            if (f > 1)
+                CreateBox("Landing", level.transform, new Vector3(-4.6f, fromY * 0.5f, -4.6f), new Vector3(2.2f, fromY, 2.2f), CTower);
+            BuildFlight(level.transform, fromY, deckY + Thickness * 0.5f, f == 1, f == 1 ? -5.5f : -3.5f);
         }
     }
 
@@ -190,13 +192,13 @@ public static class ArenaBuilder
         CreateBox("Rail_S", parent, new Vector3(-0.7f, railY, -3.3f), new Vector3(5.6f, 1.5f, 0.2f), CRail);
     }
 
-    static void BuildFlight(Transform parent, float fromY, float toY, bool solid)
+    static void BuildFlight(Transform parent, float fromY, float toY, bool solid, float xStart)
     {
         int steps = 24;
-        float depth = 0.375f;
         float width = 2.2f;
         float xEnd = 3.5f;
         float zC = -4.6f;
+        float depth = (xEnd - xStart) / steps;
         float rise = toY - fromY;
         float h = rise / steps;
 
