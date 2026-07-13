@@ -288,7 +288,7 @@ public static class ArenaBuilder
         return cyl;
     }
 
-    static Material Mat(Color color)
+    internal static Material Mat(Color color)
     {
         if (!AssetDatabase.IsValidFolder("Assets/Materials"))
             AssetDatabase.CreateFolder("Assets", "Materials");
