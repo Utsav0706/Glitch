@@ -61,15 +61,19 @@ public class MoveBehaviour : GenericBehaviour
 			// Set jump related parameters.
 			behaviourManager.LockTempBehaviour(this.behaviourCode);
 			behaviourManager.GetAnim.SetBool(jumpBool, true);
-			// Temporarily change player friction to pass through obstacles.
-			GetComponent<CapsuleCollider>().material.dynamicFriction = 0f;
-			GetComponent<CapsuleCollider>().material.staticFriction = 0f;
-			// Remove vertical velocity to avoid "super jumps" on slope ends.
-			RemoveVerticalVelocity();
-			// Set jump vertical impulse velocity.
-			float velocity = 2f * Mathf.Abs(Physics.gravity.y) * jumpHeight;
-			velocity = Mathf.Sqrt(velocity);
-			behaviourManager.GetRigidBody.AddForce(Vector3.up * velocity, ForceMode.VelocityChange);
+			// Is a locomotion jump?
+			if (behaviourManager.GetAnim.GetFloat(speedFloat) > 0.1)
+			{
+				// Temporarily change player friction to pass through obstacles.
+				GetComponent<CapsuleCollider>().material.dynamicFriction = 0f;
+				GetComponent<CapsuleCollider>().material.staticFriction = 0f;
+				// Remove vertical velocity to avoid "super jumps" on slope ends.
+				RemoveVerticalVelocity();
+				// Set jump vertical impulse velocity.
+				float velocity = 2f * Mathf.Abs(Physics.gravity.y) * jumpHeight;
+				velocity = Mathf.Sqrt(velocity);
+				behaviourManager.GetRigidBody.AddForce(Vector3.up * velocity, ForceMode.VelocityChange);
+			}
 		}
 		// Is already jumping?
 		else if (behaviourManager.GetAnim.GetBool(jumpBool))
