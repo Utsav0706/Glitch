@@ -96,10 +96,10 @@ public static class ArenaBuilder
     {
         Transform g = NewGroup("Watchtowers");
         float c = YardSize * 0.5f - 8f;
-        BuildTower(g, "Tower_NE", new Vector3(c, 0f, c), 0f);
-        BuildTower(g, "Tower_NW", new Vector3(-c, 0f, c), 0f);
-        BuildTower(g, "Tower_SE", new Vector3(c, 0f, -c), 180f);
-        BuildTower(g, "Tower_SW", new Vector3(-c, 0f, -c), 180f);
+        BuildTower(g, "Tower_NE", new Vector3(c, 0f, c), 0f, 2);
+        BuildTower(g, "Tower_NW", new Vector3(-c, 0f, c), 0f, 1);
+        BuildTower(g, "Tower_SE", new Vector3(c, 0f, -c), 180f, 1);
+        BuildTower(g, "Tower_SW", new Vector3(-c, 0f, -c), 180f, 2);
     }
 
     [MenuItem("GLITCH/Arena/Props", priority = 24)]
@@ -143,32 +143,39 @@ public static class ArenaBuilder
         }
     }
 
-    static void BuildTower(Transform parent, string name, Vector3 center, float yaw)
+    static void BuildTower(Transform parent, string name, Vector3 center, float yaw, int floors)
     {
         GameObject t = new GameObject(name);
         t.transform.SetParent(parent, false);
         t.transform.localPosition = center;
         t.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
         float s = 2.5f;
-        CreateBox("Leg_A", t.transform, new Vector3(s, TowerHeight * 0.5f, s), new Vector3(0.5f, TowerHeight, 0.5f), CTower);
-        CreateBox("Leg_B", t.transform, new Vector3(-s, TowerHeight * 0.5f, s), new Vector3(0.5f, TowerHeight, 0.5f), CTower);
-        CreateBox("Leg_C", t.transform, new Vector3(s, TowerHeight * 0.5f, -s), new Vector3(0.5f, TowerHeight, 0.5f), CTower);
-        CreateBox("Leg_D", t.transform, new Vector3(-s, TowerHeight * 0.5f, -s), new Vector3(0.5f, TowerHeight, 0.5f), CTower);
-        BuildDeck(t.transform, TowerHeight, true);
-        BuildFlight(t.transform, 0f, TowerHeight + Thickness * 0.5f, true);
+        float legH = TowerHeight * floors;
+        CreateBox("Leg_A", t.transform, new Vector3(s, legH * 0.5f, s), new Vector3(0.5f, legH, 0.5f), CTower);
+        CreateBox("Leg_B", t.transform, new Vector3(-s, legH * 0.5f, s), new Vector3(0.5f, legH, 0.5f), CTower);
+        CreateBox("Leg_C", t.transform, new Vector3(s, legH * 0.5f, -s), new Vector3(0.5f, legH, 0.5f), CTower);
+        CreateBox("Leg_D", t.transform, new Vector3(-s, legH * 0.5f, -s), new Vector3(0.5f, legH, 0.5f), CTower);
+
+        for (int f = 1; f <= floors; f++)
+        {
+            GameObject level = new GameObject("Level_" + f);
+            level.transform.SetParent(t.transform, false);
+            level.transform.localRotation = Quaternion.Euler(0f, -90f * (f - 1), 0f);
+            float deckY = TowerHeight * f;
+            float fromY = f == 1 ? 0f : TowerHeight * (f - 1) + Thickness * 0.5f;
+            BuildDeck(level.transform, deckY);
+            BuildFlight(level.transform, fromY, deckY + Thickness * 0.5f, f == 1);
+        }
     }
 
-    static void BuildDeck(Transform parent, float deckY, bool stairGap)
+    static void BuildDeck(Transform parent, float deckY)
     {
         float railY = deckY + 0.75f;
         CreateBox("Deck", parent, new Vector3(0f, deckY, 0f), new Vector3(7f, Thickness, 7f), CTower);
         CreateBox("Rail_N", parent, new Vector3(0f, railY, 3.3f), new Vector3(7f, 1.5f, 0.2f), CRail);
         CreateBox("Rail_E", parent, new Vector3(3.3f, railY, 0f), new Vector3(0.2f, 1.5f, 7f), CRail);
         CreateBox("Rail_W", parent, new Vector3(-3.3f, railY, 0f), new Vector3(0.2f, 1.5f, 7f), CRail);
-        if (stairGap)
-            CreateBox("Rail_S", parent, new Vector3(-0.7f, railY, -3.3f), new Vector3(5.6f, 1.5f, 0.2f), CRail);
-        else
-            CreateBox("Rail_S", parent, new Vector3(0f, railY, -3.3f), new Vector3(7f, 1.5f, 0.2f), CRail);
+        CreateBox("Rail_S", parent, new Vector3(-0.7f, railY, -3.3f), new Vector3(5.6f, 1.5f, 0.2f), CRail);
     }
 
     static void BuildFlight(Transform parent, float fromY, float toY, bool solid)
