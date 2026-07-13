@@ -50,12 +50,16 @@ public static class PlayerBuilder
         BasicBehaviour basic = player.AddComponent<BasicBehaviour>();
         basic.playerCamera = cam.transform;
 
-        player.AddComponent<MoveBehaviour>();
+        MoveBehaviour move = player.AddComponent<MoveBehaviour>();
+        move.jumpInertialForce = 0f;
 
         AimBehaviourBasic aim = player.AddComponent<AimBehaviourBasic>();
         aim.crosshair = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/3rdPerson+Fly/Textures/decal_crosshair.png");
 
         player.AddComponent<PlayerMotor>();
+
+        PlayerFire fire = player.AddComponent<PlayerFire>();
+        fire.projectileMaterial = ArenaBuilder.Mat(new Color(0.95f, 0.85f, 0.20f));
 
         GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
         body.name = "Body";
