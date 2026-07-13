@@ -89,6 +89,18 @@ public static class ArenaBuilder
         }
 
         CreateBox("Roof", g, new Vector3(0f, WallHeight + Thickness * 0.5f, 0f), new Vector3(BuildingSize, Thickness, BuildingSize), CRoof);
+
+        GameObject stairs = new GameObject("RoofStairs");
+        stairs.transform.SetParent(g, false);
+        stairs.transform.localPosition = new Vector3(21.5f, 0f, -26.5f);
+        BuildFlight(stairs.transform, 0f, WallHeight + Thickness, true);
+
+        float railY = WallHeight + Thickness + 0.5f;
+        CreateBox("RoofRail_N", g, new Vector3(0f, railY, 29.8f), new Vector3(59.6f, 1f, 0.2f), CRail);
+        CreateBox("RoofRail_E", g, new Vector3(29.8f, railY, 0f), new Vector3(0.2f, 1f, 59.6f), CRail);
+        CreateBox("RoofRail_W", g, new Vector3(-29.8f, railY, 0f), new Vector3(0.2f, 1f, 59.6f), CRail);
+        CreateBox("RoofRail_S0", g, new Vector3(-2.9f, railY, -29.8f), new Vector3(53.8f, 1f, 0.2f), CRail);
+        CreateBox("RoofRail_S1", g, new Vector3(27.6f, railY, -29.8f), new Vector3(4.4f, 1f, 0.2f), CRail);
     }
 
     [MenuItem("GLITCH/Arena/Watchtowers", priority = 23)]
