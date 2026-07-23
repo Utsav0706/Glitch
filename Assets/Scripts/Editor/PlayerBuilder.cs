@@ -104,6 +104,8 @@ public static class PlayerBuilder
         shoot.range = 100f;
         shoot.muzzle = muzzle;
 
+        player.AddComponent<Crosshair>();
+
         Undo.RegisterCreatedObjectUndo(player, "Build Player");
         Selection.activeGameObject = player;
         EditorSceneManager.MarkSceneDirty(player.scene);
