@@ -79,13 +79,56 @@ public static class PlayerBuilder
         Health health = player.AddComponent<Health>();
         health.maxHealth = 100f;
 
+        GameObject muzzleObj = new GameObject("Muzzle");
+        muzzleObj.transform.SetParent(player.transform, false);
+        muzzleObj.transform.localPosition = new Vector3(0f, 1.4f, 0.5f);
+
+        Light muzzleLight = muzzleObj.AddComponent<Light>();
+        muzzleLight.type = LightType.Point;
+        muzzleLight.color = new Color(1f, 0.85f, 0.5f);
+        muzzleLight.range = 6f;
+        muzzleLight.intensity = 4f;
+
+        GameObject spark = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        spark.name = "FlashSpark";
+        Object.DestroyImmediate(spark.GetComponent<Collider>());
+        spark.transform.SetParent(muzzleObj.transform, false);
+        spark.transform.localPosition = Vector3.zero;
+        spark.transform.localScale = Vector3.one * 0.15f;
+        spark.GetComponent<Renderer>().sharedMaterial = FlashMat();
+
+        MuzzleFlash muzzle = muzzleObj.AddComponent<MuzzleFlash>();
+
         PlayerShoot shoot = player.AddComponent<PlayerShoot>();
         shoot.damage = 20f;
         shoot.range = 100f;
+        shoot.muzzle = muzzle;
 
         Undo.RegisterCreatedObjectUndo(player, "Build Player");
         Selection.activeGameObject = player;
         EditorSceneManager.MarkSceneDirty(player.scene);
         Debug.Log("[PlayerBuilder] Animated player built from Mixamo character.");
+    }
+
+    static Material FlashMat()
+    {
+        string path = "Assets/Materials/MuzzleFlash.mat";
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (m == null)
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/Materials"))
+                AssetDatabase.CreateFolder("Assets", "Materials");
+            Shader sh = Shader.Find("Universal Render Pipeline/Lit");
+            if (sh == null) sh = Shader.Find("Standard");
+            m = new Material(sh);
+            Color c = new Color(1f, 0.9f, 0.5f);
+            m.color = c;
+            m.SetColor("_BaseColor", c);
+            m.EnableKeyword("_EMISSION");
+            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+            m.SetColor("_EmissionColor", c * 4f);
+            AssetDatabase.CreateAsset(m, path);
+        }
+        return m;
     }
 }

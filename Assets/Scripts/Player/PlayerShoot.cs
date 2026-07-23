@@ -6,6 +6,7 @@ public class PlayerShoot : MonoBehaviour
     public float damage = 20f;
     public float range = 100f;
     public float fireCooldown = 0.15f;
+    public MuzzleFlash muzzle;
 
     Camera cam;
     float nextFire;
@@ -27,6 +28,8 @@ public class PlayerShoot : MonoBehaviour
     void Fire()
     {
         if (cam == null) return;
+
+        if (muzzle != null) muzzle.Flash();
 
         Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f));
         RaycastHit[] hits = Physics.RaycastAll(ray, range, ~0, QueryTriggerInteraction.Ignore);
