@@ -35,6 +35,12 @@ public class Health : MonoBehaviour
         current = Mathf.Min(maxHealth, current + amount);
     }
 
+    public void Revive()
+    {
+        dead = false;
+        current = maxHealth;
+    }
+
     void Die()
     {
         dead = true;

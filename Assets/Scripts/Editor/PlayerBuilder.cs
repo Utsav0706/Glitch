@@ -106,6 +106,10 @@ public static class PlayerBuilder
 
         player.AddComponent<Crosshair>();
 
+        HUD hud = player.AddComponent<HUD>();
+        hud.health = health;
+        hud.shoot = shoot;
+
         Undo.RegisterCreatedObjectUndo(player, "Build Player");
         Selection.activeGameObject = player;
         EditorSceneManager.MarkSceneDirty(player.scene);

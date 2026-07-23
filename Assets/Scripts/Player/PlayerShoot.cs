@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerShoot : MonoBehaviour
@@ -6,19 +7,31 @@ public class PlayerShoot : MonoBehaviour
     public float damage = 20f;
     public float range = 100f;
     public float fireCooldown = 0.15f;
+    public int maxAmmo = 12;
+    public float reloadTime = 1.2f;
     public MuzzleFlash muzzle;
 
     Camera cam;
     float nextFire;
+    int ammo;
+    bool reloading;
+
+    public int Ammo => ammo;
+    public int MaxAmmo => maxAmmo;
+    public bool IsReloading => reloading;
 
     void Start()
     {
         cam = Camera.main;
+        ammo = maxAmmo;
     }
 
     void Update()
     {
-        if (Input.GetButton(fireButton) && Time.time >= nextFire)
+        if (Input.GetKeyDown(KeyCode.R) && !reloading && ammo < maxAmmo)
+            StartCoroutine(Reload());
+
+        if (Input.GetButton(fireButton) && Time.time >= nextFire && !reloading && ammo > 0)
         {
             nextFire = Time.time + fireCooldown;
             Fire();
@@ -28,6 +41,8 @@ public class PlayerShoot : MonoBehaviour
     void Fire()
     {
         if (cam == null) return;
+
+        ammo--;
 
         if (muzzle != null) muzzle.Flash();
 
@@ -53,5 +68,15 @@ public class PlayerShoot : MonoBehaviour
             Health h = best.collider.GetComponentInParent<Health>();
             if (h != null) h.TakeDamage(damage);
         }
+
+        if (ammo <= 0) StartCoroutine(Reload());
+    }
+
+    IEnumerator Reload()
+    {
+        reloading = true;
+        yield return new WaitForSeconds(reloadTime);
+        ammo = maxAmmo;
+        reloading = false;
     }
 }
