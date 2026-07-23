@@ -13,16 +13,25 @@ public class FSMEnemy : EnemyBase
     public float chaseRepathInterval = 0.25f;
     public float attackRange = 18f;
     public float loseTargetTime = 4f;
+    public float coverHealthThreshold = 0.4f;
+    public float coverSearchRadius = 25f;
+    public float coverRefreshInterval = 1.5f;
+    public float coverArriveRadius = 1.2f;
 
     public EnemyPerception Perception { get; private set; }
     public EnemyWeaponController Weapon { get; private set; }
     public StateMachine Machine { get; private set; }
     public string StateName => Machine != null ? Machine.CurrentName : "None";
+    public bool IsFrozen => Time.time < frozenUntil;
+    public float HealthNormalized => health != null ? health.Normalized : 1f;
 
     Vector3 home;
+    float frozenUntil;
     IState patrol;
     IState chase;
     IState attack;
+    IState takeCover;
+    IState frozen;
 
     protected override void Awake()
     {
@@ -36,6 +45,19 @@ public class FSMEnemy : EnemyBase
         patrol = new PatrolState(this);
         chase = new ChaseState(this);
         attack = new AttackState(this);
+        takeCover = new TakeCoverState(this);
+        frozen = new FrozenState(this);
+    }
+
+    public void Freeze(float duration)
+    {
+        if (duration <= 0f) return;
+        frozenUntil = Mathf.Max(frozenUntil, Time.time + duration);
+    }
+
+    public void Unfreeze()
+    {
+        frozenUntil = 0f;
     }
 
     void Start()
@@ -53,16 +75,30 @@ public class FSMEnemy : EnemyBase
 
     void Evaluate()
     {
-        Transform t = Perception.Target;
+        if (IsFrozen)
+        {
+            Machine.ChangeState(frozen);
+            return;
+        }
 
-        if (Perception.CanSeeTarget && t != null)
+        Transform t = Perception.Target;
+        bool sees = Perception.CanSeeTarget && t != null;
+        bool recent = Perception.TimeSinceSeen <= loseTargetTime;
+
+        if (HealthNormalized <= coverHealthThreshold && (sees || recent))
+        {
+            Machine.ChangeState(takeCover);
+            return;
+        }
+
+        if (sees)
         {
             float dist = Vector3.Distance(transform.position, t.position);
             Machine.ChangeState(dist <= attackRange ? attack : chase);
             return;
         }
 
-        if (Perception.TimeSinceSeen <= loseTargetTime)
+        if (recent)
         {
             Machine.ChangeState(chase);
             return;
