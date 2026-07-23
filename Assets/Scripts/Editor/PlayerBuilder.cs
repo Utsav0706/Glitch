@@ -7,7 +7,7 @@ public static class PlayerBuilder
     const string PlayerName = "Player";
     const string ModelPath = "Assets/Shoved Reaction With Spin.fbx";
 
-    static readonly Color CPlayer = new Color(0.20f, 0.50f, 0.90f);
+    static readonly Color CPlayer = new Color(0.53f, 0.81f, 0.92f);
 
     [MenuItem("GLITCH/Player/Build Player", priority = 40)]
     public static void BuildPlayer()
