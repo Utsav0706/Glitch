@@ -117,7 +117,7 @@ public static class PlayerBuilder
         Debug.Log("[PlayerBuilder] Animated player built from Mixamo character.");
     }
 
-    static Material FlashMat()
+    internal static Material FlashMat()
     {
         string path = "Assets/Materials/MuzzleFlash.mat";
         Material m = AssetDatabase.LoadAssetAtPath<Material>(path);
