@@ -25,6 +25,7 @@ public static class PlayerBuilder
         GameObject player = (GameObject)PrefabUtility.InstantiatePrefab(model);
         PrefabUtility.UnpackPrefabInstance(player, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
         player.name = PlayerName;
+        player.tag = "Player";
         player.transform.position = new Vector3(0f, 0f, -40f);
         player.transform.rotation = Quaternion.identity;
 
