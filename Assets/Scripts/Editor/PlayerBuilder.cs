@@ -79,8 +79,9 @@ public static class PlayerBuilder
         Health health = player.AddComponent<Health>();
         health.maxHealth = 100f;
 
-        PlayerFire fire = player.AddComponent<PlayerFire>();
-        fire.projectileMaterial = ArenaBuilder.Mat(new Color(0.95f, 0.85f, 0.20f));
+        PlayerShoot shoot = player.AddComponent<PlayerShoot>();
+        shoot.damage = 20f;
+        shoot.range = 100f;
 
         Undo.RegisterCreatedObjectUndo(player, "Build Player");
         Selection.activeGameObject = player;
