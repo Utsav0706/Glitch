@@ -76,6 +76,9 @@ public static class PlayerBuilder
         AimBehaviourBasic aim = player.AddComponent<AimBehaviourBasic>();
         aim.crosshair = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/3rdPerson+Fly/Textures/decal_crosshair.png");
 
+        Health health = player.AddComponent<Health>();
+        health.maxHealth = 100f;
+
         PlayerFire fire = player.AddComponent<PlayerFire>();
         fire.projectileMaterial = ArenaBuilder.Mat(new Color(0.95f, 0.85f, 0.20f));
 
