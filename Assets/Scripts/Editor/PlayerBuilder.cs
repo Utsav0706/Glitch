@@ -111,6 +111,8 @@ public static class PlayerBuilder
         hud.health = health;
         hud.shoot = shoot;
 
+        player.AddComponent<GlitchTester>();
+
         Undo.RegisterCreatedObjectUndo(player, "Build Player");
         Selection.activeGameObject = player;
         EditorSceneManager.MarkSceneDirty(player.scene);

@@ -17,6 +17,7 @@ public class FSMEnemy : EnemyBase
     public float coverSearchRadius = 25f;
     public float coverRefreshInterval = 1.5f;
     public float coverArriveRadius = 1.2f;
+    public float glitchReactionTime = 5f;
 
     public EnemyPerception Perception { get; private set; }
     public EnemyWeaponController Weapon { get; private set; }
@@ -24,9 +25,14 @@ public class FSMEnemy : EnemyBase
     public string StateName => Machine != null ? Machine.CurrentName : "None";
     public bool IsFrozen => Time.time < frozenUntil;
     public float HealthNormalized => health != null ? health.Normalized : 1f;
+    public bool IsReactingToGlitch => reaction != null && Time.time < reactionUntil;
+    public GlitchType LastGlitch => lastGlitch;
 
     Vector3 home;
     float frozenUntil;
+    IState reaction;
+    float reactionUntil;
+    GlitchType lastGlitch;
     IState patrol;
     IState chase;
     IState attack;
@@ -47,6 +53,42 @@ public class FSMEnemy : EnemyBase
         attack = new AttackState(this);
         takeCover = new TakeCoverState(this);
         frozen = new FrozenState(this);
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        GlitchEvents.Triggered += OnGlitch;
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        GlitchEvents.Triggered -= OnGlitch;
+    }
+
+    void OnGlitch(GlitchType type, float duration)
+    {
+        if (IsDead) return;
+
+        IState next = ReactionFor(type);
+        if (next == null) return;
+
+        lastGlitch = type;
+        reaction = next;
+        reactionUntil = Time.time + (duration > 0f ? duration : glitchReactionTime);
+    }
+
+    IState ReactionFor(GlitchType type)
+    {
+        switch (type)
+        {
+            case GlitchType.GravityFlip: return takeCover;
+            case GlitchType.WallDisappear: return chase;
+            case GlitchType.Blackout: return takeCover;
+            case GlitchType.TimeDilation: return attack;
+            default: return null;
+        }
     }
 
     public void Freeze(float duration)
@@ -79,6 +121,16 @@ public class FSMEnemy : EnemyBase
         {
             Machine.ChangeState(frozen);
             return;
+        }
+
+        if (reaction != null)
+        {
+            if (Time.time < reactionUntil)
+            {
+                Machine.ChangeState(reaction);
+                return;
+            }
+            reaction = null;
         }
 
         Transform t = Perception.Target;
