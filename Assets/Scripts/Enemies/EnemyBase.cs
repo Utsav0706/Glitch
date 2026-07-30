@@ -16,10 +16,12 @@ public class EnemyBase : MonoBehaviour
 
     Collider body;
     bool dead;
+    float frozenUntil;
 
     public NavMeshAgent Agent => agent;
     public bool IsDead => dead;
     public float HealthNormalized => health != null ? health.Normalized : 1f;
+    public bool IsFrozen => Time.time < frozenUntil;
     public bool CanMove => !dead && agent != null && agent.enabled && agent.isOnNavMesh;
     public bool HasPath => CanMove && agent.hasPath;
     public float RemainingDistance => CanMove && !agent.pathPending ? agent.remainingDistance : Mathf.Infinity;
@@ -72,6 +74,16 @@ public class EnemyBase : MonoBehaviour
         dir.y = 0f;
         if (dir.sqrMagnitude < 0.0001f) return;
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), turnSpeed * Time.deltaTime);
+    }
+
+    public void Freeze(float duration)
+    {
+        if (duration > 0f) frozenUntil = Mathf.Max(frozenUntil, Time.time + duration);
+    }
+
+    public void Unfreeze()
+    {
+        frozenUntil = 0f;
     }
 
     void HandleDamaged(float amount)

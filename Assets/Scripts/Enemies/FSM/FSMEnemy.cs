@@ -23,12 +23,10 @@ public class FSMEnemy : EnemyBase
     public EnemyWeaponController Weapon { get; private set; }
     public StateMachine Machine { get; private set; }
     public string StateName => Machine != null ? Machine.CurrentName : "None";
-    public bool IsFrozen => Time.time < frozenUntil;
     public bool IsReactingToGlitch => reaction != null && Time.time < reactionUntil;
     public GlitchType LastGlitch => lastGlitch;
 
     Vector3 home;
-    float frozenUntil;
     IState reaction;
     float reactionUntil;
     GlitchType lastGlitch;
@@ -88,17 +86,6 @@ public class FSMEnemy : EnemyBase
             case GlitchType.TimeDilation: return attack;
             default: return null;
         }
-    }
-
-    public void Freeze(float duration)
-    {
-        if (duration <= 0f) return;
-        frozenUntil = Mathf.Max(frozenUntil, Time.time + duration);
-    }
-
-    public void Unfreeze()
-    {
-        frozenUntil = 0f;
     }
 
     void Start()
