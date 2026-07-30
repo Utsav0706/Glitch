@@ -24,7 +24,6 @@ public class FSMEnemy : EnemyBase
     public StateMachine Machine { get; private set; }
     public string StateName => Machine != null ? Machine.CurrentName : "None";
     public bool IsFrozen => Time.time < frozenUntil;
-    public float HealthNormalized => health != null ? health.Normalized : 1f;
     public bool IsReactingToGlitch => reaction != null && Time.time < reactionUntil;
     public GlitchType LastGlitch => lastGlitch;
 

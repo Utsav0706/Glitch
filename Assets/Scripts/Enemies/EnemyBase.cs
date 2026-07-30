@@ -19,6 +19,7 @@ public class EnemyBase : MonoBehaviour
 
     public NavMeshAgent Agent => agent;
     public bool IsDead => dead;
+    public float HealthNormalized => health != null ? health.Normalized : 1f;
     public bool CanMove => !dead && agent != null && agent.enabled && agent.isOnNavMesh;
     public bool HasPath => CanMove && agent.hasPath;
     public float RemainingDistance => CanMove && !agent.pathPending ? agent.remainingDistance : Mathf.Infinity;
