@@ -46,9 +46,16 @@ public static class EnemyBuilder
 
         Vector3[] spots =
         {
-            new Vector3(-38f, 0f, 20f),
-            new Vector3(38f, 0f, 20f),
-            new Vector3(0f, 0f, 40f),
+            new Vector3(-40f, 0f, 40f),
+            new Vector3(40f, 0f, 40f),
+            new Vector3(0f, 0f, 42f),
+            new Vector3(42f, 0f, -15f),
+            new Vector3(-42f, 0f, 15f),
+            new Vector3(28f, 0f, -42f),
+            new Vector3(-28f, 0f, -42f),
+            new Vector3(-7.5f, 0f, 7.5f),
+            new Vector3(7.5f, 0f, -7.5f),
+            new Vector3(22.5f, 0f, 22.5f),
         };
 
         for (int i = 0; i < spots.Length; i++)
