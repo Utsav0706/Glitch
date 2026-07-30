@@ -93,7 +93,7 @@ public static class ArenaBuilder
         GameObject stairs = new GameObject("RoofStairs");
         stairs.transform.SetParent(g, false);
         stairs.transform.localPosition = new Vector3(21.5f, 0f, -26.5f);
-        BuildFlight(stairs.transform, 0f, WallHeight + Thickness, true, -5.5f);
+        BuildFlight(stairs.transform, 0f, WallHeight + Thickness, -5.5f, 3.5f, -4.6f);
 
         float railY = WallHeight + Thickness + 0.5f;
         CreateBox("RoofRail_N", g, new Vector3(0f, railY, 29.8f), new Vector3(59.6f, 1f, 0.2f), CRail);
@@ -161,7 +161,7 @@ public static class ArenaBuilder
         t.transform.SetParent(parent, false);
         t.transform.localPosition = center;
         t.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
-        float s = 2.5f;
+        float s = 3.0f;
         float legH = TowerHeight * floors;
         CreateBox("Leg_A", t.transform, new Vector3(s, legH * 0.5f, s), new Vector3(0.5f, legH, 0.5f), CTower);
         CreateBox("Leg_B", t.transform, new Vector3(-s, legH * 0.5f, s), new Vector3(0.5f, legH, 0.5f), CTower);
@@ -172,52 +172,100 @@ public static class ArenaBuilder
         {
             GameObject level = new GameObject("Level_" + f);
             level.transform.SetParent(t.transform, false);
-            level.transform.localRotation = Quaternion.Euler(0f, -90f * (f - 1), 0f);
             float deckY = TowerHeight * f;
             float fromY = f == 1 ? 0f : TowerHeight * (f - 1) + Thickness * 0.5f;
-            BuildDeck(level.transform, deckY);
-            if (f > 1)
-                CreateBox("Landing", level.transform, new Vector3(-4.6f, fromY * 0.5f, -4.6f), new Vector3(2.2f, fromY, 2.2f), CTower);
-            BuildFlight(level.transform, fromY, deckY + Thickness * 0.5f, f == 1, f == 1 ? -5.5f : -3.5f);
+            float toY = deckY + Thickness * 0.5f;
+            bool goingEast = (f % 2) == 1;
+            float xLow = f == 1 ? -5.5f : (goingEast ? -3.5f : 3.5f);
+            float xHigh = goingEast ? 3.5f : -3.5f;
+
+            BuildDeck(level.transform, deckY, goingEast);
+            BuildFlight(level.transform, fromY, toY, xLow, xHigh, -4.4f);
         }
     }
 
-    static void BuildDeck(Transform parent, float deckY)
+    static void BuildDeck(Transform parent, float deckY, bool openEast)
     {
-        float railY = deckY + 0.75f;
+        float railY = deckY + 0.6f;
+        float railH = 1.2f;
+        float e = 3.4f;
+        float half = 3.5f;
+        float open = 2.2f;
+
         CreateBox("Deck", parent, new Vector3(0f, deckY, 0f), new Vector3(7f, Thickness, 7f), CTower);
-        CreateBox("Rail_N", parent, new Vector3(0f, railY, 3.3f), new Vector3(7f, 1.5f, 0.2f), CRail);
-        CreateBox("Rail_E", parent, new Vector3(3.3f, railY, 0f), new Vector3(0.2f, 1.5f, 7f), CRail);
-        CreateBox("Rail_W", parent, new Vector3(-3.3f, railY, 0f), new Vector3(0.2f, 1.5f, 7f), CRail);
-        CreateBox("Rail_S", parent, new Vector3(-0.7f, railY, -3.3f), new Vector3(5.6f, 1.5f, 0.2f), CRail);
+        RailX(parent, railY, railH, -half, half, e);
+
+        if (openEast)
+        {
+            RailX(parent, railY, railH, -half, half - open, -e);
+            RailZ(parent, railY, railH, -half, half, -e);
+            RailZ(parent, railY, railH, -half + open, half, e);
+        }
+        else
+        {
+            RailX(parent, railY, railH, -half + open, half, -e);
+            RailZ(parent, railY, railH, -half, half, e);
+            RailZ(parent, railY, railH, -half + open, half, -e);
+        }
     }
 
-    static void BuildFlight(Transform parent, float fromY, float toY, bool solid, float xStart)
+    static void RailX(Transform parent, float railY, float railH, float x1, float x2, float z)
+    {
+        if (x2 - x1 < 0.05f) return;
+        CreateBox("Rail", parent, new Vector3((x1 + x2) * 0.5f, railY, z), new Vector3(x2 - x1, railH, 0.2f), CRail);
+    }
+
+    static void RailZ(Transform parent, float railY, float railH, float z1, float z2, float x)
+    {
+        if (z2 - z1 < 0.05f) return;
+        CreateBox("Rail", parent, new Vector3(x, railY, (z1 + z2) * 0.5f), new Vector3(0.2f, railH, z2 - z1), CRail);
+    }
+
+    static void BuildFlight(Transform parent, float fromY, float toY, float xLow, float xHigh, float zC)
     {
         int steps = 24;
-        float width = 2.2f;
-        float xEnd = 3.5f;
-        float zC = -4.6f;
-        float depth = (xEnd - xStart) / steps;
+        float width = 1.8f;
         float rise = toY - fromY;
+        float dx = (xHigh - xLow) / steps;
         float h = rise / steps;
 
         for (int j = 1; j <= steps; j++)
         {
             float top = fromY + h * j;
-            float x = xEnd - (steps - j + 0.5f) * depth;
-            if (solid)
-                CreateBox("Step_" + j, parent, new Vector3(x, top * 0.5f, zC), new Vector3(depth, top, width), CTower);
-            else
-                CreateBox("Step_" + j, parent, new Vector3(x, top - 0.2f, zC), new Vector3(depth, 0.4f, width), CTower);
+            float x = xLow + dx * (j - 0.5f);
+            CreateBox("Step_" + j, parent, new Vector3(x, (fromY + top) * 0.5f, zC), new Vector3(Mathf.Abs(dx), top - fromY, width), CTower);
         }
 
-        float run = steps * depth;
+        float run = Mathf.Abs(xHigh - xLow);
         float rampLen = Mathf.Sqrt(run * run + rise * rise);
-        float angle = Mathf.Atan2(rise, run) * Mathf.Rad2Deg;
-        GameObject ramp = CreateBox("Ramp", parent, new Vector3(xEnd - run * 0.5f, (fromY + toY) * 0.5f, zC), new Vector3(rampLen, 0.06f, width), CTower);
+        float angle = Mathf.Atan2(rise, xHigh - xLow) * Mathf.Rad2Deg;
+        GameObject ramp = CreateBox("Ramp", parent, new Vector3((xLow + xHigh) * 0.5f, (fromY + toY) * 0.5f, zC), new Vector3(rampLen, 0.06f, width), CTower);
         ramp.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
         ramp.GetComponent<MeshRenderer>().enabled = false;
+
+        BuildStairRail(parent, xLow, fromY, xHigh, toY, zC - width * 0.5f + 0.1f);
+    }
+
+    static void BuildStairRail(Transform parent, float xStart, float yStart, float xEnd, float yEnd, float z)
+    {
+        float railH = 1.0f;
+        Vector3 a = new Vector3(xStart, yStart + railH, z);
+        Vector3 b = new Vector3(xEnd, yEnd + railH, z);
+        Vector3 mid = (a + b) * 0.5f;
+        float len = Vector3.Distance(a, b);
+        float angle = Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg;
+
+        GameObject bar = CreateBox("Rail", parent, mid, new Vector3(len, 0.12f, 0.12f), CRail);
+        bar.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+
+        int posts = 5;
+        for (int i = 0; i <= posts; i++)
+        {
+            float t = i / (float)posts;
+            float px = Mathf.Lerp(xStart, xEnd, t);
+            float py = Mathf.Lerp(yStart, yEnd, t);
+            CreateBox("Post", parent, new Vector3(px, py + railH * 0.5f, z), new Vector3(0.12f, railH, 0.12f), CRail);
+        }
     }
 
     static void BuildWallWithGaps(Transform parent, string name, bool vertical, float fixedCoord, float from, float to, float height, float[] gapCenters, float gapWidth, Color color)

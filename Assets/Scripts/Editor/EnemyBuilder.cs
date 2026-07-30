@@ -22,13 +22,13 @@ public static class EnemyBuilder
 
         Vector3[] spots =
         {
-            new Vector3(-8f, 0f, -12f),
-            new Vector3(0f, 0f, -6f),
-            new Vector3(8f, 0f, -12f),
+            new Vector3(-8f, 0f, -34f),
+            new Vector3(0f, 0f, -34f),
+            new Vector3(8f, 0f, -34f),
         };
 
         for (int i = 0; i < spots.Length; i++)
-            CreateDummy(root.transform, spots[i], i);
+            CreateDummy(root.transform, OnNavMesh(spots[i]), i);
 
         Undo.RegisterCreatedObjectUndo(root, "Build Dummy Targets");
         Selection.activeGameObject = root;
@@ -46,13 +46,13 @@ public static class EnemyBuilder
 
         Vector3[] spots =
         {
-            new Vector3(-20f, 0f, 10f),
-            new Vector3(20f, 0f, 10f),
-            new Vector3(0f, 0f, 28f),
+            new Vector3(-38f, 0f, 20f),
+            new Vector3(38f, 0f, 20f),
+            new Vector3(0f, 0f, 40f),
         };
 
         for (int i = 0; i < spots.Length; i++)
-            CreateFSMEnemy(root.transform, spots[i], i);
+            CreateFSMEnemy(root.transform, OnNavMesh(spots[i]), i);
 
         Undo.RegisterCreatedObjectUndo(root, "Build FSM Enemies");
         Selection.activeGameObject = root;
@@ -195,5 +195,12 @@ public static class EnemyBuilder
         Bounds b = rs[0].bounds;
         for (int i = 1; i < rs.Length; i++) b.Encapsulate(rs[i].bounds);
         return b;
+    }
+
+    static Vector3 OnNavMesh(Vector3 p)
+    {
+        if (NavMesh.SamplePosition(p, out NavMeshHit hit, 8f, NavMesh.AllAreas))
+            return hit.position;
+        return p;
     }
 }
