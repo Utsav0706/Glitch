@@ -4,29 +4,27 @@ using UnityEngine;
 [RequireComponent(typeof(Health))]
 public class TargetDummy : MonoBehaviour
 {
-    public Color hitColor = Color.white;
-    public Color deadColor = new Color(0.25f, 0.25f, 0.25f);
+    public Color hitColor = new Color(1f, 0.35f, 0.3f);
+    public Color deadColor = new Color(0.3f, 0.3f, 0.3f);
     public float flashTime = 0.08f;
     public float respawnDelay = 3f;
 
     Health health;
-    Renderer rend;
+    Renderer[] rends;
     Collider body;
     MaterialPropertyBlock mpb;
-    Color baseColor;
+    Color baseColor = Color.white;
     float flashOffAt;
     bool dead;
 
     void Awake()
     {
         health = GetComponent<Health>();
-        rend = GetComponentInChildren<Renderer>();
+        rends = GetComponentsInChildren<Renderer>();
         body = GetComponent<Collider>();
         mpb = new MaterialPropertyBlock();
-        if (rend != null && rend.sharedMaterial != null)
-            baseColor = rend.sharedMaterial.color;
-        else
-            baseColor = Color.white;
+        if (rends.Length > 0 && rends[0].sharedMaterial != null)
+            baseColor = rends[0].sharedMaterial.color;
     }
 
     void OnEnable()
@@ -77,10 +75,15 @@ public class TargetDummy : MonoBehaviour
 
     void SetColor(Color c)
     {
-        if (rend == null) return;
-        rend.GetPropertyBlock(mpb);
-        mpb.SetColor("_BaseColor", c);
-        mpb.SetColor("_Color", c);
-        rend.SetPropertyBlock(mpb);
+        if (rends == null) return;
+        for (int i = 0; i < rends.Length; i++)
+        {
+            Renderer r = rends[i];
+            if (r == null) continue;
+            r.GetPropertyBlock(mpb);
+            mpb.SetColor("_BaseColor", c);
+            mpb.SetColor("_Color", c);
+            r.SetPropertyBlock(mpb);
+        }
     }
 }
