@@ -30,4 +30,15 @@ public abstract class EnemyAction : UtilityAction
         Vector3 basePos = Sees && Target != null ? Target.position : perception.LastKnownPosition;
         return basePos + Vector3.up * 1.4f;
     }
+
+    protected bool TryGlitchScore(string key, out float score)
+    {
+        if (GlitchEvents.IsActive)
+        {
+            score = GlitchScoreTable.Get(GlitchEvents.ActiveType, key);
+            return true;
+        }
+        score = 0f;
+        return false;
+    }
 }

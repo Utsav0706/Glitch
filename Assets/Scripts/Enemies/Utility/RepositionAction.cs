@@ -15,6 +15,7 @@ public class RepositionAction : EnemyAction
 
     public override float Score()
     {
+        if (TryGlitchScore("Reposition", out float g)) return g;
         if (!Known(loseTargetTime)) return 0f;
         return weight * (Sees ? 0.25f : 0.8f);
     }

@@ -13,6 +13,7 @@ public class SpreadFireAction : EnemyAction
 
     public override float Score()
     {
+        if (TryGlitchScore("SpreadFire", out float g)) return g;
         if (!Known(loseTargetTime)) return 0f;
         if (!perception.IsInViewCone(ThreatPoint())) return 0f;
 

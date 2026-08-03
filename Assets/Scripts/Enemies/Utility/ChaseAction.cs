@@ -14,6 +14,7 @@ public class ChaseAction : EnemyAction
 
     public override float Score()
     {
+        if (TryGlitchScore("Chase", out float g)) return g;
         if (!Known(loseTargetTime)) return 0f;
         if (!Sees) return weight * 0.7f;
 

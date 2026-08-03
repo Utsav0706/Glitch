@@ -5,7 +5,6 @@ public class TakeCoverAction : EnemyAction
     public float weight = 1f;
     public float searchRadius = 25f;
     public float loseTargetTime = 4f;
-    public float glitchBonus = 0.4f;
     public float arriveRadius = 1.2f;
 
     CoverPoint cover;
@@ -15,11 +14,13 @@ public class TakeCoverAction : EnemyAction
 
     public override float Score()
     {
+        if (TryGlitchScore("TakeCover", out float g)) return g;
+
         if (!Known(loseTargetTime)) return 0f;
 
         float hurt = Considerations.Hurt(body.HealthNormalized);
         float exposure = Considerations.Exposure(Sees, DistanceToTarget(), searchRadius);
-        return weight * Considerations.Product(hurt, exposure) + Considerations.GlitchBonus(GlitchEvents.IsActive, glitchBonus);
+        return weight * Considerations.Product(hurt, exposure);
     }
 
     public override void OnEnter()

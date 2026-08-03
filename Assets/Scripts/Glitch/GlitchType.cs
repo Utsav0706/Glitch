@@ -1,7 +1,8 @@
 public enum GlitchType
 {
     GravityFlip,
+    EnemyDuplicate,
     WallDisappear,
-    Blackout,
-    TimeDilation,
+    TimeStutter,
+    PlayerDuplicate,
 }

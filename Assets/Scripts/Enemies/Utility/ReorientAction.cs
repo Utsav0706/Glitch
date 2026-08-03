@@ -10,6 +10,7 @@ public class ReorientAction : EnemyAction
 
     public override float Score()
     {
+        if (TryGlitchScore("Reorient", out float g)) return g;
         if (!Known(loseTargetTime)) return 0f;
         bool inCone = perception.IsInViewCone(ThreatPoint());
         return weight * (inCone ? 0.1f : 0.9f);

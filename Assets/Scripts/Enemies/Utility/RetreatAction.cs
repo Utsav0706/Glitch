@@ -16,6 +16,7 @@ public class RetreatAction : EnemyAction
 
     public override float Score()
     {
+        if (TryGlitchScore("Retreat", out float g)) return g;
         if (!Known(loseTargetTime)) return 0f;
         float hurt = Considerations.Curve(Considerations.Hurt(body.HealthNormalized), 3f);
         float exposure = Considerations.Exposure(Sees, DistanceToTarget(), searchRadius);

@@ -81,9 +81,10 @@ public class FSMEnemy : EnemyBase
         switch (type)
         {
             case GlitchType.GravityFlip: return takeCover;
+            case GlitchType.EnemyDuplicate: return attack;
             case GlitchType.WallDisappear: return chase;
-            case GlitchType.Blackout: return takeCover;
-            case GlitchType.TimeDilation: return attack;
+            case GlitchType.TimeStutter: return frozen;
+            case GlitchType.PlayerDuplicate: return attack;
             default: return null;
         }
     }
