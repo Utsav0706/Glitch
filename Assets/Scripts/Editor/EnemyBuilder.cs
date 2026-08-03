@@ -5,36 +5,14 @@ using UnityEditor.SceneManagement;
 
 public static class EnemyBuilder
 {
-    const string RootName = "Enemies";
     const string FSMRootName = "FSM Enemies";
+    const string UtilityRootName = "Utility Enemies";
 
     const string RobotModelPath = "Assets/GDTV Sharp Shooter Assets/Models/Enemies/HoveringRobot02.fbx";
     const string PalettePath = "Assets/GDTV Sharp Shooter Assets/Textures & Materials/Sci Fi/Colour Palette.mat";
     const float HoverGap = 0.35f;
 
-    [MenuItem("GLITCH/Enemies/Build Dummy Targets", priority = 60)]
-    public static void BuildDummies()
-    {
-        GameObject old = GameObject.Find(RootName);
-        if (old != null) Object.DestroyImmediate(old);
-
-        GameObject root = new GameObject(RootName);
-
-        Vector3[] spots =
-        {
-            new Vector3(-8f, 0f, -34f),
-            new Vector3(0f, 0f, -34f),
-            new Vector3(8f, 0f, -34f),
-        };
-
-        for (int i = 0; i < spots.Length; i++)
-            CreateDummy(root.transform, OnNavMesh(spots[i]), i);
-
-        Undo.RegisterCreatedObjectUndo(root, "Build Dummy Targets");
-        Selection.activeGameObject = root;
-        EditorSceneManager.MarkSceneDirty(root.scene);
-        Debug.Log("[EnemyBuilder] Dummy targets built.");
-    }
+    static readonly Color CUtility = new Color(0.80f, 0.13f, 0.13f);
 
     [MenuItem("GLITCH/Enemies/Build FSM Enemies", priority = 61)]
     public static void BuildFSMEnemies()
@@ -67,10 +45,50 @@ public static class EnemyBuilder
         Debug.Log("[EnemyBuilder] " + spots.Length + " FSM enemies built.");
     }
 
+    [MenuItem("GLITCH/Enemies/Build Utility Enemies", priority = 62)]
+    public static void BuildUtilityEnemies()
+    {
+        GameObject old = GameObject.Find(UtilityRootName);
+        if (old != null) Object.DestroyImmediate(old);
+
+        GameObject root = new GameObject(UtilityRootName);
+        root.AddComponent<UtilityDebugOverlay>();
+
+        Vector3[] spots =
+        {
+            new Vector3(-20f, 0f, 42f),
+            new Vector3(20f, 0f, 42f),
+            new Vector3(44f, 0f, 5f),
+            new Vector3(-44f, 0f, 5f),
+            new Vector3(0f, 0f, 44f),
+        };
+
+        for (int i = 0; i < spots.Length; i++)
+            CreateUtilityEnemy(root.transform, OnNavMesh(spots[i]), i);
+
+        Undo.RegisterCreatedObjectUndo(root, "Build Utility Enemies");
+        Selection.activeGameObject = root;
+        EditorSceneManager.MarkSceneDirty(root.scene);
+        Debug.Log("[EnemyBuilder] " + spots.Length + " Utility enemies built. Press F5 in Play mode to toggle the score overlay.");
+    }
+
     static void CreateFSMEnemy(Transform parent, Vector3 pos, int index)
     {
         GameObject enemy = NewRobotEnemy(parent, "FSM Enemy " + (index + 1), pos, out float height, out float radius, out float centerY);
+        AddCombatRig(enemy, height, radius, centerY);
+        enemy.AddComponent<FSMEnemy>();
+    }
 
+    static void CreateUtilityEnemy(Transform parent, Vector3 pos, int index)
+    {
+        GameObject enemy = NewRobotEnemy(parent, "Utility Enemy " + (index + 1), pos, out float height, out float radius, out float centerY);
+        TintEnemy(enemy, ArenaBuilder.Mat(CUtility));
+        AddCombatRig(enemy, height, radius, centerY);
+        enemy.AddComponent<UtilityEnemy>();
+    }
+
+    static void AddCombatRig(GameObject enemy, float height, float radius, float centerY)
+    {
         NavMeshAgent agent = enemy.AddComponent<NavMeshAgent>();
         agent.radius = radius;
         agent.height = height;
@@ -112,18 +130,16 @@ public static class EnemyBuilder
         weapon.fireRate = 1.5f;
         weapon.spreadDegrees = 4f;
         weapon.muzzleHeight = centerY;
-
-        enemy.AddComponent<FSMEnemy>();
     }
 
-    static void CreateDummy(Transform parent, Vector3 pos, int index)
+    static void TintEnemy(GameObject enemy, Material mat)
     {
-        GameObject dummy = NewRobotEnemy(parent, "Dummy " + (index + 1), pos, out float _, out float _, out float _);
-
-        Health health = dummy.AddComponent<Health>();
-        health.maxHealth = 60f;
-
-        dummy.AddComponent<TargetDummy>();
+        foreach (Renderer r in enemy.GetComponentsInChildren<Renderer>())
+        {
+            Material[] mats = r.sharedMaterials;
+            for (int i = 0; i < mats.Length; i++) mats[i] = mat;
+            r.sharedMaterials = mats;
+        }
     }
 
     static GameObject NewRobotEnemy(Transform parent, string name, Vector3 pos, out float height, out float radius, out float centerY)
