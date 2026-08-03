@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.Animations;
 
 public static class PlayerBuilder
 {
@@ -126,6 +127,59 @@ public static class PlayerBuilder
         Selection.activeGameObject = player;
         EditorSceneManager.MarkSceneDirty(player.scene);
         Debug.Log("[PlayerBuilder] Animated player built from Mixamo character.");
+    }
+
+    [MenuItem("GLITCH/Player/Setup Fire Animation", priority = 41)]
+    public static void SetupFireAnimation()
+    {
+        AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>("Assets/3rdPerson+Fly/Animators/CharacterController.controller");
+        if (controller == null)
+        {
+            Debug.LogError("[PlayerBuilder] CharacterController.controller not found.");
+            return;
+        }
+
+        foreach (AnimatorControllerLayer l in controller.layers)
+            if (l.name == "Gunplay")
+            {
+                Debug.Log("[PlayerBuilder] Gunplay layer already present.");
+                return;
+            }
+
+        AnimationClip clip = LoadGunplayClip();
+        if (clip == null)
+        {
+            Debug.LogError("[PlayerBuilder] No AnimationClip in Gunplay.fbx - import it as Humanoid first.");
+            return;
+        }
+
+        controller.AddLayer("Gunplay");
+
+        AnimatorControllerLayer[] layers = controller.layers;
+        int idx = layers.Length - 1;
+        layers[idx].defaultWeight = 0f;
+        layers[idx].blendingMode = AnimatorLayerBlendingMode.Override;
+        controller.layers = layers;
+
+        AnimatorStateMachine sm = controller.layers[idx].stateMachine;
+        AnimatorState fire = sm.AddState("Fire");
+        fire.motion = clip;
+        sm.defaultState = fire;
+
+        EditorUtility.SetDirty(controller);
+        AssetDatabase.SaveAssets();
+        Debug.Log("[PlayerBuilder] Gunplay layer added - it plays while you fire.");
+    }
+
+    static AnimationClip LoadGunplayClip()
+    {
+        Object[] all = AssetDatabase.LoadAllAssetsAtPath("Assets/3rdPerson+Fly/Animations/Gunplay.fbx");
+        foreach (Object o in all)
+        {
+            AnimationClip c = o as AnimationClip;
+            if (c != null && !c.name.StartsWith("__preview")) return c;
+        }
+        return null;
     }
 
     static GameObject AttachGun(GameObject player, Animator anim)
