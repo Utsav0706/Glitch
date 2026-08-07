@@ -1,14 +1,11 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEditor.Animations;
 
 public static class PlayerBuilder
 {
     const string PlayerName = "Player";
     const string ModelPath = "Assets/Shoved Reaction With Spin.fbx";
-    const string GunPath = "Assets/GDTV Sharp Shooter Assets/Models/Kinetic Weapons/Heavy_machine_gun_01_Blue_Team.fbx";
-    const string PalettePath = "Assets/GDTV Sharp Shooter Assets/Textures & Materials/Sci Fi/Colour Palette.mat";
 
     static readonly Color CPlayer = new Color(0.53f, 0.81f, 0.92f);
 
@@ -78,16 +75,14 @@ public static class PlayerBuilder
         player.AddComponent<MoveBehaviour>();
 
         AimBehaviourBasic aim = player.AddComponent<AimBehaviourBasic>();
-        aim.crosshair = null;
+        aim.crosshair = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/3rdPerson+Fly/Textures/decal_crosshair.png");
 
         Health health = player.AddComponent<Health>();
         health.maxHealth = 100f;
 
-        GameObject gun = AttachGun(player, anim);
-
         GameObject muzzleObj = new GameObject("Muzzle");
-        muzzleObj.transform.SetParent(gun != null ? gun.transform : player.transform, false);
-        muzzleObj.transform.localPosition = gun != null ? new Vector3(0f, 0f, 0.55f) : new Vector3(0.25f, 1.3f, 0.6f);
+        muzzleObj.transform.SetParent(player.transform, false);
+        muzzleObj.transform.localPosition = new Vector3(0f, 1.4f, 0.5f);
 
         Light muzzleLight = muzzleObj.AddComponent<Light>();
         muzzleLight.type = LightType.Point;
@@ -100,22 +95,17 @@ public static class PlayerBuilder
         Object.DestroyImmediate(spark.GetComponent<Collider>());
         spark.transform.SetParent(muzzleObj.transform, false);
         spark.transform.localPosition = Vector3.zero;
-        spark.transform.localScale = Vector3.one * 0.12f;
+        spark.transform.localScale = Vector3.one * 0.15f;
         spark.GetComponent<Renderer>().sharedMaterial = FlashMat();
 
         MuzzleFlash muzzle = muzzleObj.AddComponent<MuzzleFlash>();
 
         PlayerShoot shoot = player.AddComponent<PlayerShoot>();
-        shoot.damage = 18f;
-        shoot.range = 120f;
-        shoot.fireCooldown = 0.1f;
-        shoot.maxAmmo = 30;
-        shoot.reloadTime = 1.8f;
+        shoot.damage = 20f;
+        shoot.range = 100f;
         shoot.muzzle = muzzle;
 
-        Crosshair crosshair = player.AddComponent<Crosshair>();
-        crosshair.shoot = shoot;
-        crosshair.hideWhileAiming = false;
+        player.AddComponent<Crosshair>();
 
         HUD hud = player.AddComponent<HUD>();
         hud.health = health;
@@ -127,97 +117,6 @@ public static class PlayerBuilder
         Selection.activeGameObject = player;
         EditorSceneManager.MarkSceneDirty(player.scene);
         Debug.Log("[PlayerBuilder] Animated player built from Mixamo character.");
-    }
-
-    [MenuItem("GLITCH/Player/Setup Fire Animation", priority = 41)]
-    public static void SetupFireAnimation()
-    {
-        AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>("Assets/3rdPerson+Fly/Animators/CharacterController.controller");
-        if (controller == null)
-        {
-            Debug.LogError("[PlayerBuilder] CharacterController.controller not found.");
-            return;
-        }
-
-        foreach (AnimatorControllerLayer l in controller.layers)
-            if (l.name == "Gunplay")
-            {
-                Debug.Log("[PlayerBuilder] Gunplay layer already present.");
-                return;
-            }
-
-        AnimationClip clip = LoadGunplayClip();
-        if (clip == null)
-        {
-            Debug.LogError("[PlayerBuilder] No AnimationClip in Gunplay.fbx - import it as Humanoid first.");
-            return;
-        }
-
-        controller.AddLayer("Gunplay");
-
-        AnimatorControllerLayer[] layers = controller.layers;
-        int idx = layers.Length - 1;
-        layers[idx].defaultWeight = 0f;
-        layers[idx].blendingMode = AnimatorLayerBlendingMode.Override;
-        controller.layers = layers;
-
-        AnimatorStateMachine sm = controller.layers[idx].stateMachine;
-        AnimatorState fire = sm.AddState("Fire");
-        fire.motion = clip;
-        sm.defaultState = fire;
-
-        EditorUtility.SetDirty(controller);
-        AssetDatabase.SaveAssets();
-        Debug.Log("[PlayerBuilder] Gunplay layer added - it plays while you fire.");
-    }
-
-    static AnimationClip LoadGunplayClip()
-    {
-        Object[] all = AssetDatabase.LoadAllAssetsAtPath("Assets/3rdPerson+Fly/Animations/Gunplay.fbx");
-        foreach (Object o in all)
-        {
-            AnimationClip c = o as AnimationClip;
-            if (c != null && !c.name.StartsWith("__preview")) return c;
-        }
-        return null;
-    }
-
-    static GameObject AttachGun(GameObject player, Animator anim)
-    {
-        GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(GunPath);
-        if (asset == null)
-        {
-            Debug.LogWarning("[PlayerBuilder] Gun model not found at " + GunPath);
-            return null;
-        }
-
-        Transform hand = anim != null ? anim.GetBoneTransform(HumanBodyBones.RightHand) : null;
-        Transform parent = hand != null ? hand : player.transform;
-
-        GameObject gun = (GameObject)PrefabUtility.InstantiatePrefab(asset);
-        PrefabUtility.UnpackPrefabInstance(gun, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
-        gun.name = "Gun";
-        gun.transform.SetParent(parent, false);
-        gun.transform.localPosition = hand != null ? new Vector3(0.03f, 0.02f, 0.05f) : new Vector3(0.25f, 1.3f, 0.35f);
-        gun.transform.localRotation = Quaternion.identity;
-
-        foreach (Collider c in gun.GetComponentsInChildren<Collider>())
-            Object.DestroyImmediate(c);
-
-        Material palette = AssetDatabase.LoadAssetAtPath<Material>(PalettePath);
-        if (palette != null)
-        {
-            foreach (Renderer r in gun.GetComponentsInChildren<Renderer>())
-            {
-                Material[] mats = r.sharedMaterials;
-                bool changed = false;
-                for (int i = 0; i < mats.Length; i++)
-                    if (mats[i] == null) { mats[i] = palette; changed = true; }
-                if (changed) r.sharedMaterials = mats;
-            }
-        }
-
-        return gun;
     }
 
     internal static Material FlashMat()

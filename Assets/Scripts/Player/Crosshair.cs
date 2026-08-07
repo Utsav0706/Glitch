@@ -8,14 +8,13 @@ public class Crosshair : MonoBehaviour
     public float gap = 4f;
     public bool hideWhileAiming = true;
     public string aimButton = "Aim";
-    public PlayerShoot shoot;
 
     void OnGUI()
     {
         if (hideWhileAiming && Input.GetAxisRaw(aimButton) != 0f) return;
 
-        float cx = shoot != null ? shoot.AimScreenPoint.x : Screen.width * 0.5f;
-        float cy = shoot != null ? Screen.height - shoot.AimScreenPoint.y : Screen.height * 0.5f;
+        float cx = Screen.width * 0.5f;
+        float cy = Screen.height * 0.5f;
 
         Color prev = GUI.color;
         GUI.color = color;
