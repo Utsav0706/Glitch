@@ -17,11 +17,13 @@ public class Decoy : MonoBehaviour
         health.Revive();
         health.Died += OnDied;
 
+        PlayerCopies.Register(transform);
         Follow();
     }
 
     void OnDestroy()
     {
+        PlayerCopies.Unregister(transform);
         if (health != null) health.Died -= OnDied;
     }
 

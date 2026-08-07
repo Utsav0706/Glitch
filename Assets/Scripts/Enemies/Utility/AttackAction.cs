@@ -12,7 +12,7 @@ public class AttackAction : EnemyAction
     {
         if (TryGlitchScore("Attack", out float g)) return g;
         if (!Sees) return 0f;
-        return weight * Considerations.Closeness(DistanceToTarget(), range);
+        return weight * Considerations.Closeness(DistanceToTarget(), range) * Certainty();
     }
 
     public override void OnEnter()

@@ -25,11 +25,14 @@ public class FSMEnemy : EnemyBase
     public string StateName => Machine != null ? Machine.CurrentName : "None";
     public bool IsReactingToGlitch => reaction != null && Time.time < reactionUntil;
     public GlitchType LastGlitch => lastGlitch;
+    public Transform AttackTarget => lockedCopy != null ? lockedCopy : Perception.Target;
 
     Vector3 home;
     IState reaction;
     float reactionUntil;
     GlitchType lastGlitch;
+    Transform lockedCopy;
+    bool copyPicked;
     IState patrol;
     IState chase;
     IState attack;
@@ -114,10 +117,17 @@ public class FSMEnemy : EnemyBase
         {
             if (Time.time < reactionUntil)
             {
+                if (lastGlitch == GlitchType.PlayerDuplicate && !copyPicked)
+                {
+                    lockedCopy = PlayerCopies.Random();
+                    copyPicked = true;
+                }
                 Machine.ChangeState(reaction);
                 return;
             }
             reaction = null;
+            lockedCopy = null;
+            copyPicked = false;
         }
 
         Transform t = Perception.Target;

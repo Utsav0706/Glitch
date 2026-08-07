@@ -16,7 +16,7 @@ public class AttackState : IState
 
     public void Tick()
     {
-        Transform t = e.Perception.Target;
+        Transform t = e.AttackTarget;
         if (t == null) return;
 
         e.FaceTowards(t.position);

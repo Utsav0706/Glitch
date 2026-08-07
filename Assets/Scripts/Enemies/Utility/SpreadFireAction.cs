@@ -5,6 +5,7 @@ public class SpreadFireAction : EnemyAction
     public float weight = 0.6f;
     public float loseTargetTime = 4f;
     public float spreadDegrees = 10f;
+    public float uncertaintyWeight = 0.9f;
 
     float savedSpread;
 
@@ -18,7 +19,8 @@ public class SpreadFireAction : EnemyAction
         if (!perception.IsInViewCone(ThreatPoint())) return 0f;
 
         float rangeOk = Considerations.InRange(DistanceToTarget(), weapon.range * 0.5f, weapon.range * 0.5f);
-        return weight * (Sees ? 0.3f : 0.6f) * rangeOk;
+        float uncertain = uncertaintyWeight * (1f - Certainty());
+        return weight * (Sees ? 0.3f : 0.6f) * rangeOk + uncertain;
     }
 
     public override void OnEnter()

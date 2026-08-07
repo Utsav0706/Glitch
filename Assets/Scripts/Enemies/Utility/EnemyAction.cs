@@ -33,12 +33,17 @@ public abstract class EnemyAction : UtilityAction
 
     protected bool TryGlitchScore(string key, out float score)
     {
-        if (GlitchEvents.IsActive)
+        if (GlitchEvents.IsActive && GlitchEvents.ActiveType != GlitchType.PlayerDuplicate)
         {
             score = GlitchScoreTable.Get(GlitchEvents.ActiveType, key);
             return true;
         }
         score = 0f;
         return false;
+    }
+
+    protected float Certainty()
+    {
+        return Considerations.TargetCertainty(PlayerCopies.Count);
     }
 }

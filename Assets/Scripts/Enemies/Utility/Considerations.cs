@@ -35,6 +35,11 @@ public static class Considerations
         return exposedToThreat ? Closeness(distance, maxDistance) : 0f;
     }
 
+    public static float TargetCertainty(int copies)
+    {
+        return copies <= 1 ? 1f : 1f / copies;
+    }
+
     public static float Product(params float[] values)
     {
         float result = 1f;

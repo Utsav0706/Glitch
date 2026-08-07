@@ -20,10 +20,6 @@ public static class GlitchScoreTable
         {
             { "Freeze", 100f },
         } },
-        { GlitchType.PlayerDuplicate, new Dictionary<string, float>
-        {
-            { "SpreadFire", 70f }, { "Attack", 55f }, { "Retreat", 45f },
-        } },
     };
 
     public static float Get(GlitchType glitch, string actionKey)
