@@ -72,6 +72,10 @@ public class PlayerShoot : MonoBehaviour
             if (h != null) h.TakeDamage(damage);
         }
 
+        Vector3 tracerFrom = muzzle != null ? muzzle.transform.position : ray.origin;
+        Vector3 tracerTo = found ? best.point : ray.GetPoint(range);
+        Tracer.Spawn(tracerFrom, tracerTo, Color.white);
+
         if (ammo <= 0) StartCoroutine(Reload());
     }
 

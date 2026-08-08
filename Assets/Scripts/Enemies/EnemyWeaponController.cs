@@ -9,8 +9,15 @@ public class EnemyWeaponController : MonoBehaviour
     public float muzzleHeight = 1.5f;
     public LayerMask hitMask = ~0;
     public MuzzleFlash muzzle;
+    public Color shotColor = Color.clear;
 
     float nextShot;
+
+    void Awake()
+    {
+        if (shotColor == Color.clear)
+            shotColor = GetComponent<UtilityEnemy>() != null ? new Color(1f, 0.3f, 0.3f) : new Color(0.35f, 0.6f, 1f);
+    }
 
     public bool CanFire => Time.time >= nextShot;
     public Vector3 MuzzlePosition => transform.position + Vector3.up * muzzleHeight;
@@ -39,13 +46,18 @@ public class EnemyWeaponController : MonoBehaviour
 
         if (muzzle != null) muzzle.Flash();
 
-        if (!Physics.Raycast(origin, dir, out RaycastHit hit, range, hitMask, QueryTriggerInteraction.Ignore))
-            return;
+        Vector3 endPoint = origin + dir * range;
 
-        if (hit.transform.root == transform.root) return;
+        if (Physics.Raycast(origin, dir, out RaycastHit hit, range, hitMask, QueryTriggerInteraction.Ignore)
+            && hit.transform.root != transform.root)
+        {
+            endPoint = hit.point;
+            Health h = hit.collider.GetComponentInParent<Health>();
+            if (h != null) h.TakeDamage(damage);
+        }
 
-        Health h = hit.collider.GetComponentInParent<Health>();
-        if (h != null) h.TakeDamage(damage);
+        Vector3 from = muzzle != null ? muzzle.transform.position : origin;
+        Tracer.Spawn(from, endPoint, shotColor);
     }
 
     Vector3 ApplySpread(Vector3 dir)
