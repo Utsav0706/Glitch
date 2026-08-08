@@ -18,6 +18,12 @@ public static class GlitchEvents
         Triggered?.Invoke(type, duration);
     }
 
+    public static void Reset()
+    {
+        activeUntil = 0f;
+        activeType = default;
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics()
     {
