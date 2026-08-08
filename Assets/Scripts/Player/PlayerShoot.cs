@@ -12,6 +12,7 @@ public class PlayerShoot : MonoBehaviour
     public MuzzleFlash muzzle;
 
     Camera cam;
+    Crosshair reticle;
     float nextFire;
     int ammo;
     bool reloading;
@@ -23,6 +24,7 @@ public class PlayerShoot : MonoBehaviour
     void Start()
     {
         cam = Camera.main;
+        reticle = FindFirstObjectByType<Crosshair>();
         ammo = maxAmmo;
     }
 
@@ -46,7 +48,8 @@ public class PlayerShoot : MonoBehaviour
 
         if (muzzle != null) muzzle.Flash();
 
-        Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f));
+        Vector3 aimPoint = reticle != null ? reticle.AimScreenPoint : new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
+        Ray ray = cam.ScreenPointToRay(aimPoint);
         RaycastHit[] hits = Physics.RaycastAll(ray, range, ~0, QueryTriggerInteraction.Ignore);
 
         RaycastHit best = default;
