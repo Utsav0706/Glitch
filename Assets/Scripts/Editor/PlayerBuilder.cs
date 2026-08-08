@@ -78,7 +78,7 @@ public static class PlayerBuilder
         aim.crosshair = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/3rdPerson+Fly/Textures/decal_crosshair.png");
 
         Health health = player.AddComponent<Health>();
-        health.maxHealth = 100f;
+        health.maxHealth = 150f;
 
         GameObject muzzleObj = new GameObject("Muzzle");
         muzzleObj.transform.SetParent(player.transform, false);
@@ -103,6 +103,7 @@ public static class PlayerBuilder
         PlayerShoot shoot = player.AddComponent<PlayerShoot>();
         shoot.damage = 20f;
         shoot.range = 100f;
+        shoot.maxAmmo = 32;
         shoot.muzzle = muzzle;
 
         player.AddComponent<Crosshair>();
