@@ -4,10 +4,8 @@ using UnityEngine;
 public class PlayerDuplicateEffect : MonoBehaviour
 {
     public Vector3[] offsets = { new Vector3(1.6f, 0f, -0.4f), new Vector3(-1.6f, 0f, -0.4f) };
-    public Color decoyColor = new Color(0.53f, 0.81f, 0.92f);
 
     readonly List<GameObject> decoys = new List<GameObject>();
-    Material decoyMat;
     bool active;
     float endTime;
 
@@ -48,16 +46,27 @@ public class PlayerDuplicateEffect : MonoBehaviour
 
     GameObject MakeDecoy(GameObject player, Vector3 offset)
     {
-        GameObject d = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        GameObject d = Instantiate(player);
         d.name = "PlayerDecoy";
-        d.transform.localScale = new Vector3(0.6f, 0.9f, 0.6f);
-        d.transform.position = player.transform.position + player.transform.TransformDirection(offset);
-        d.transform.rotation = player.transform.rotation;
-        d.GetComponent<Renderer>().sharedMaterial = DecoyMaterial();
+        d.tag = "Untagged";
+        d.transform.SetPositionAndRotation(
+            player.transform.position + player.transform.TransformDirection(offset),
+            player.transform.rotation);
 
-        Rigidbody rb = d.AddComponent<Rigidbody>();
-        rb.isKinematic = true;
-        rb.useGravity = false;
+        foreach (MonoBehaviour mb in d.GetComponentsInChildren<MonoBehaviour>(true))
+            if (mb != null && !(mb is Health)) mb.enabled = false;
+
+        foreach (Rigidbody rb in d.GetComponentsInChildren<Rigidbody>(true))
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+
+        Transform muzzle = d.transform.Find("Muzzle");
+        if (muzzle != null) muzzle.gameObject.SetActive(false);
+
+        Animator anim = d.GetComponent<Animator>();
+        if (anim != null) anim.applyRootMotion = false;
 
         Decoy decoy = d.AddComponent<Decoy>();
         decoy.Init(player.transform, offset);
@@ -75,17 +84,5 @@ public class PlayerDuplicateEffect : MonoBehaviour
         for (int i = 0; i < decoys.Count; i++)
             if (decoys[i] != null) Destroy(decoys[i]);
         decoys.Clear();
-    }
-
-    Material DecoyMaterial()
-    {
-        if (decoyMat != null) return decoyMat;
-
-        Shader sh = Shader.Find("Universal Render Pipeline/Lit");
-        if (sh == null) sh = Shader.Find("Standard");
-        decoyMat = new Material(sh);
-        decoyMat.color = decoyColor;
-        decoyMat.SetColor("_BaseColor", decoyColor);
-        return decoyMat;
     }
 }
