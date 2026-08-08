@@ -10,6 +10,7 @@ public static class EnemyBuilder
 
     const string RobotModelPath = "Assets/GDTV Sharp Shooter Assets/Models/Enemies/HoveringRobot02.fbx";
     const string PalettePath = "Assets/GDTV Sharp Shooter Assets/Textures & Materials/Sci Fi/Colour Palette.mat";
+    const string RedPalettePath = "Assets/GDTV Sharp Shooter Assets/Textures & Materials/Sci Fi/Colour Palette Red.mat";
     const float HoverGap = 0.35f;
 
     static readonly Color CUtility = new Color(0.80f, 0.13f, 0.13f);
@@ -82,7 +83,7 @@ public static class EnemyBuilder
     static void CreateUtilityEnemy(Transform parent, Vector3 pos, int index)
     {
         GameObject enemy = NewRobotEnemy(parent, "Utility Enemy " + (index + 1), pos, out float height, out float radius, out float centerY);
-        TintEnemy(enemy, ArenaBuilder.Mat(CUtility));
+        TintEnemy(enemy, RedPalette());
         AddCombatRig(enemy, height, radius, centerY);
         enemy.AddComponent<UtilityEnemy>();
     }
@@ -130,6 +131,15 @@ public static class EnemyBuilder
         weapon.fireRate = 1.5f;
         weapon.spreadDegrees = 4f;
         weapon.muzzleHeight = centerY;
+    }
+
+    static Material RedPalette()
+    {
+        Material m = AssetDatabase.LoadAssetAtPath<Material>(RedPalettePath);
+        if (m != null) return m;
+
+        Debug.LogWarning("[EnemyBuilder] Red palette not found at " + RedPalettePath + " — using flat tint.");
+        return ArenaBuilder.Mat(CUtility);
     }
 
     static void TintEnemy(GameObject enemy, Material mat)
