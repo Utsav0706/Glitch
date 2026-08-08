@@ -12,8 +12,8 @@ public static class ArenaBuilder
     const int Rows = 4;
     const float Thickness = 0.4f;
     const float WallHeight = 5f;
-    const float PerimeterHeight = 6f;
-    const float DoorWidth = 3.5f;
+    const float PerimeterHeight = 18f;
+    const float DoorWidth = 8f;
     const float GateWidth = 8f;
     const float TowerHeight = 6f;
 
@@ -56,10 +56,12 @@ public static class ArenaBuilder
     {
         Transform g = NewGroup("Perimeter");
         float off = YardSize * 0.5f - Thickness * 0.5f;
-        BuildWallWithGaps(g, "North", false, off, -YardSize * 0.5f, YardSize * 0.5f, PerimeterHeight, null, 0f, CPerimeter);
-        BuildWallWithGaps(g, "South", false, -off, -YardSize * 0.5f, YardSize * 0.5f, PerimeterHeight, new[] { 0f }, GateWidth, CPerimeter);
-        BuildWallWithGaps(g, "East", true, off, -YardSize * 0.5f, YardSize * 0.5f, PerimeterHeight, null, 0f, CPerimeter);
-        BuildWallWithGaps(g, "West", true, -off, -YardSize * 0.5f, YardSize * 0.5f, PerimeterHeight, null, 0f, CPerimeter);
+        float lo = -YardSize * 0.5f;
+        float hi = YardSize * 0.5f;
+        BuildWallWithGaps(g, "North", false, off, lo, hi, PerimeterHeight, null, 0f, CPerimeter);
+        BuildWallWithGaps(g, "South", false, -off, lo, hi, PerimeterHeight, null, 0f, CPerimeter);
+        BuildWallWithGaps(g, "East", true, off, lo, hi, PerimeterHeight, null, 0f, CPerimeter);
+        BuildWallWithGaps(g, "West", true, -off, lo, hi, PerimeterHeight, null, 0f, CPerimeter);
     }
 
     [MenuItem("GLITCH/Arena/Building", priority = 22)]
@@ -69,13 +71,13 @@ public static class ArenaBuilder
         float bhalf = BuildingSize * 0.5f;
         float boff = bhalf - Thickness * 0.5f;
 
-        BuildWallWithGaps(g, "Ext_North", false, boff, -bhalf, bhalf, WallHeight, null, 0f, CExt);
-        BuildWallWithGaps(g, "Ext_South", false, -boff, -bhalf, bhalf, WallHeight, new[] { 0f }, DoorWidth, CExt);
-        BuildWallWithGaps(g, "Ext_East", true, boff, -bhalf, bhalf, WallHeight, null, 0f, CExt);
-        BuildWallWithGaps(g, "Ext_West", true, -boff, -bhalf, bhalf, WallHeight, null, 0f, CExt);
-
         float[] rowCenters = RoomCenters(Rows);
         float[] colCenters = RoomCenters(Cols);
+
+        BuildWallWithGaps(g, "Ext_North", false, boff, -bhalf, bhalf, WallHeight, colCenters, DoorWidth, CExt);
+        BuildWallWithGaps(g, "Ext_South", false, -boff, -bhalf, bhalf, WallHeight, colCenters, DoorWidth, CExt);
+        BuildWallWithGaps(g, "Ext_East", true, boff, -bhalf, bhalf, WallHeight, rowCenters, DoorWidth, CExt);
+        BuildWallWithGaps(g, "Ext_West", true, -boff, -bhalf, bhalf, WallHeight, rowCenters, DoorWidth, CExt);
 
         for (int i = 1; i < Cols; i++)
         {
