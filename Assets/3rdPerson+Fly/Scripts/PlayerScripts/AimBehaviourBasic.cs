@@ -13,7 +13,20 @@ public class AimBehaviourBasic : GenericBehaviour
 	private int aimBool;                                                  // Animator variable related to aiming.
 	private bool aim;                                                     // Boolean to determine whether or not the player is aiming.
 
-	// Start is always called after any Awake functions.
+	private Crosshair reticle;
+
+	Vector2 ReticleCenter()
+	{
+		if (reticle == null)
+			reticle = FindFirstObjectByType<Crosshair>();
+		if (reticle != null)
+		{
+			Vector3 p = reticle.AimScreenPoint;
+			return new Vector2(p.x, Screen.height - p.y);
+		}
+		return new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+	}
+
 	void Start ()
 	{
 		// Set up the references.
@@ -127,9 +140,12 @@ public class AimBehaviourBasic : GenericBehaviour
 		{
 			float mag = behaviourManager.GetCamScript.GetCurrentPivotMagnitude(aimPivotOffset);
 			if (mag < 0.05f)
-				GUI.DrawTexture(new Rect(Screen.width / 2.0f - (crosshair.width * 0.5f),
-										 Screen.height / 2.0f - (crosshair.height * 0.5f),
+			{
+				Vector2 c = ReticleCenter();
+				GUI.DrawTexture(new Rect(c.x - (crosshair.width * 0.5f),
+										 c.y - (crosshair.height * 0.5f),
 										 crosshair.width, crosshair.height), crosshair);
+			}
 		}
 	}
 }
