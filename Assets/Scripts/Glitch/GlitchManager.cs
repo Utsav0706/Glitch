@@ -48,17 +48,22 @@ public class GlitchManager : MonoBehaviour
     {
         if (systemGlitches && Time.time >= nextSystem)
         {
-            FireSystemGlitch();
-            ScheduleNext();
+            if (GlitchEvents.IsActive)
+                nextSystem = Time.time + 1f;
+            else
+            {
+                FireSystemGlitch();
+                ScheduleNext();
+            }
         }
 
-        if (Input.GetKeyDown(timeStutterKey) && Time.time >= stutterReady)
+        if (Input.GetKeyDown(timeStutterKey) && Time.time >= stutterReady && !GlitchEvents.IsActive)
         {
             stutterReady = Time.time + timeStutterCooldown;
             GlitchEvents.Raise(GlitchType.TimeStutter, timeStutterDuration);
         }
 
-        if (Input.GetKeyDown(playerDuplicateKey) && Time.time >= duplicateReady)
+        if (Input.GetKeyDown(playerDuplicateKey) && Time.time >= duplicateReady && !GlitchEvents.IsActive)
         {
             duplicateReady = Time.time + playerDuplicateCooldown;
             GlitchEvents.Raise(GlitchType.PlayerDuplicate, playerDuplicateDuration);
