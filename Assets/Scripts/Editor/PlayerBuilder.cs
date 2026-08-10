@@ -103,7 +103,8 @@ public static class PlayerBuilder
         PlayerShoot shoot = player.AddComponent<PlayerShoot>();
         shoot.damage = 20f;
         shoot.range = 100f;
-        shoot.maxAmmo = 32;
+        shoot.maxAmmo = 100;
+        shoot.fireCooldown = 0.07f;
         shoot.muzzle = muzzle;
 
         player.AddComponent<Crosshair>();

@@ -6,8 +6,8 @@ public class PlayerShoot : MonoBehaviour
     public string fireButton = "Fire1";
     public float damage = 20f;
     public float range = 100f;
-    public float fireCooldown = 0.15f;
-    public int maxAmmo = 32;
+    public float fireCooldown = 0.07f;
+    public int maxAmmo = 100;
     public float reloadTime = 1.2f;
     public MuzzleFlash muzzle;
 

@@ -7,6 +7,20 @@ public class HUD : MonoBehaviour
 
     GUIStyle label;
 
+    int enemiesLeft;
+    float nextCount;
+
+    void Update()
+    {
+        if (Time.time < nextCount) return;
+        nextCount = Time.time + 0.4f;
+
+        int n = 0;
+        foreach (FSMEnemy e in FindObjectsByType<FSMEnemy>(FindObjectsSortMode.None)) if (!e.IsDead) n++;
+        foreach (UtilityEnemy e in FindObjectsByType<UtilityEnemy>(FindObjectsSortMode.None)) if (!e.IsDead) n++;
+        enemiesLeft = n;
+    }
+
     void EnsureStyle()
     {
         if (label != null) return;
@@ -51,6 +65,11 @@ public class HUD : MonoBehaviour
             Frame(a, new Color(1f, 1f, 1f, 0.5f));
             GUI.Label(new Rect(a.x + 8f, a.y, a.width, a.height), text, label);
         }
+
+        Rect er = new Rect(Screen.width - pad - 200f, pad, 200f, barH);
+        Fill(er, 1f, new Color(0f, 0f, 0f, 0.6f));
+        Frame(er, new Color(1f, 0.5f, 0.3f, 0.7f));
+        GUI.Label(new Rect(er.x + 8f, er.y, er.width, er.height), "ENEMIES LEFT:  " + enemiesLeft, label);
     }
 
     void Fill(Rect r, float t, Color c)
