@@ -109,10 +109,23 @@ public class EnemyBase : MonoBehaviour
 
         if (body != null) body.enabled = false;
 
+        Bounds b = RendererBounds();
+        AshBurst.Play(b.center, b.size, new Color(1f, 0.6f, 0.3f));
+
         SetRenderersEnabled(false);
         OnDeath();
 
         StartCoroutine(RespawnRoutine());
+    }
+
+    Bounds RendererBounds()
+    {
+        Renderer[] rs = GetComponentsInChildren<Renderer>();
+        if (rs.Length == 0) return new Bounds(transform.position + Vector3.up, Vector3.one);
+
+        Bounds b = rs[0].bounds;
+        for (int i = 1; i < rs.Length; i++) b.Encapsulate(rs[i].bounds);
+        return b;
     }
 
     protected virtual void OnDamaged(float amount) { }
