@@ -37,7 +37,9 @@ public static class AshBurst
         var vel = ps.velocityOverLifetime;
         vel.enabled = true;
         vel.space = ParticleSystemSimulationSpace.World;
+        vel.x = new ParticleSystem.MinMaxCurve(-0.4f, 0.4f);
         vel.y = new ParticleSystem.MinMaxCurve(0.8f, 2.0f);
+        vel.z = new ParticleSystem.MinMaxCurve(-0.4f, 0.4f);
 
         var noise = ps.noise;
         noise.enabled = true;
