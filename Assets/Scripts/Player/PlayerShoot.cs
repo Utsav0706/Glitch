@@ -13,6 +13,7 @@ public class PlayerShoot : MonoBehaviour
 
     Camera cam;
     Crosshair reticle;
+    Transform head;
     float nextFire;
     int ammo;
     bool reloading;
@@ -25,7 +26,16 @@ public class PlayerShoot : MonoBehaviour
     {
         cam = Camera.main;
         reticle = FindFirstObjectByType<Crosshair>();
+        head = FindHead();
         ammo = maxAmmo;
+    }
+
+    Transform FindHead()
+    {
+        foreach (Transform t in GetComponentsInChildren<Transform>())
+            if (t.name.ToLower().EndsWith("head"))
+                return t;
+        return null;
     }
 
     void Update()
@@ -46,7 +56,13 @@ public class PlayerShoot : MonoBehaviour
 
         ammo--;
 
-        if (muzzle != null) muzzle.Flash();
+        Vector3 shotOrigin = head != null ? head.position + Vector3.up * 0.1f : transform.position + Vector3.up * 1.6f;
+
+        if (muzzle != null)
+        {
+            muzzle.transform.position = shotOrigin;
+            muzzle.Flash();
+        }
 
         Vector3 aimPoint = reticle != null ? reticle.AimScreenPoint : new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
         Ray ray = cam.ScreenPointToRay(aimPoint);
@@ -72,9 +88,8 @@ public class PlayerShoot : MonoBehaviour
             if (h != null) h.TakeDamage(damage);
         }
 
-        Vector3 tracerFrom = muzzle != null ? muzzle.transform.position : ray.origin;
         Vector3 tracerTo = found ? best.point : ray.GetPoint(range);
-        Tracer.Spawn(tracerFrom, tracerTo, Color.white);
+        Tracer.Spawn(shotOrigin, tracerTo, Color.white);
 
         if (ammo <= 0) StartCoroutine(Reload());
     }

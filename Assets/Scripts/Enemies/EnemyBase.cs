@@ -9,7 +9,7 @@ public class EnemyBase : MonoBehaviour
     public float moveSpeed = 3.5f;
     public float stoppingDistance = 1.5f;
     public float turnSpeed = 8f;
-    public float despawnDelay = 3f;
+    public float respawnDelay = 15f;
 
     protected Health health;
     protected NavMeshAgent agent;
@@ -109,18 +109,65 @@ public class EnemyBase : MonoBehaviour
 
         if (body != null) body.enabled = false;
 
+        SetRenderersEnabled(false);
         OnDeath();
 
-        if (despawnDelay > 0f) StartCoroutine(Despawn());
+        StartCoroutine(RespawnRoutine());
     }
 
     protected virtual void OnDamaged(float amount) { }
 
     protected virtual void OnDeath() { }
 
-    IEnumerator Despawn()
+    IEnumerator RespawnRoutine()
     {
-        yield return new WaitForSeconds(despawnDelay);
-        Destroy(gameObject);
+        yield return new WaitForSeconds(respawnDelay);
+        RespawnNow();
+    }
+
+    void RespawnNow()
+    {
+        Vector3 pos = RandomNavPoint();
+        transform.position = pos;
+
+        health.Revive();
+        dead = false;
+        frozenUntil = 0f;
+
+        if (agent != null)
+        {
+            agent.enabled = true;
+            agent.Warp(pos);
+            agent.isStopped = false;
+            agent.speed = moveSpeed;
+            agent.stoppingDistance = stoppingDistance;
+        }
+
+        if (body != null) body.enabled = true;
+        SetRenderersEnabled(true);
+    }
+
+    Vector3 RandomNavPoint()
+    {
+        GameObject playerGo = GameObject.FindGameObjectWithTag("Player");
+        Transform player = playerGo != null ? playerGo.transform : null;
+
+        for (int i = 0; i < 40; i++)
+        {
+            Vector3 c = new Vector3(Random.Range(-46f, 46f), 1f, Random.Range(-46f, 46f));
+            if (NavMesh.SamplePosition(c, out NavMeshHit hit, 8f, NavMesh.AllAreas))
+            {
+                if (player != null && (hit.position - player.position).sqrMagnitude < 144f) continue;
+                return hit.position;
+            }
+        }
+
+        return transform.position;
+    }
+
+    void SetRenderersEnabled(bool on)
+    {
+        foreach (Renderer r in GetComponentsInChildren<Renderer>(true))
+            r.enabled = on;
     }
 }
