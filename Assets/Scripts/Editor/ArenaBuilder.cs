@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -136,15 +137,24 @@ public static class ArenaBuilder
             }
         }
 
+        List<Vector3> spots = new List<Vector3>();
+        float minGap = 5.5f;
         int placed = 0;
         int attempts = 0;
-        while (placed < 40 && attempts < 400)
+        while (placed < 40 && attempts < 2000)
         {
             attempts++;
             float x = (float)(rng.NextDouble() * (YardSize - 6f) - (YardSize - 6f) * 0.5f);
             float z = (float)(rng.NextDouble() * (YardSize - 6f) - (YardSize - 6f) * 0.5f);
             if (Mathf.Abs(x) < BuildingSize * 0.5f + 3f && Mathf.Abs(z) < BuildingSize * 0.5f + 3f) continue;
             if (Mathf.Abs(x) < GateWidth && z < -BuildingSize * 0.5f) continue;
+
+            Vector3 spot = new Vector3(x, 0f, z);
+            bool tooClose = false;
+            for (int k = 0; k < spots.Count; k++)
+                if ((spots[k] - spot).sqrMagnitude < minGap * minGap) { tooClose = true; break; }
+            if (tooClose) continue;
+            spots.Add(spot);
 
             int type = placed % 3;
             if (type == 0)

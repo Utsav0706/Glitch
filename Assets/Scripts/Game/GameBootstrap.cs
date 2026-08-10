@@ -25,6 +25,7 @@ public static class GameBootstrap
         Ensure<PlayerDuplicateEffect>();
         Ensure<EnemyDuplicateEffect>();
         Ensure<GameOverController>();
+        Ensure<DataLogger>();
     }
 
     static void Ensure<T>() where T : MonoBehaviour
