@@ -14,13 +14,14 @@ public class TakeCoverAction : EnemyAction
 
     public override float Score()
     {
-        if (TryGlitchScore("TakeCover", out float g)) return g;
-
-        if (!Known(loseTargetTime)) return 0f;
-
-        float hurt = Considerations.Hurt(body.HealthNormalized);
-        float exposure = Considerations.Exposure(Sees, DistanceToTarget(), searchRadius);
-        return weight * Considerations.Product(hurt, exposure);
+        float emergent = 0f;
+        if (Known(loseTargetTime))
+        {
+            float hurt = Considerations.Hurt(body.HealthNormalized);
+            float exposure = Considerations.Exposure(Sees, DistanceToTarget(), searchRadius);
+            emergent = weight * Considerations.Product(hurt, exposure);
+        }
+        return emergent + GlitchBonus("TakeCover");
     }
 
     public override void OnEnter()

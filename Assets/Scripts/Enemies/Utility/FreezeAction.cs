@@ -6,8 +6,7 @@ public class FreezeAction : EnemyAction
     public override float Score()
     {
         if (body.IsFrozen) return 100f;
-        if (TryGlitchScore("Freeze", out float g)) return g;
-        return 0f;
+        return GlitchBonus("Freeze");
     }
 
     public override void OnEnter()

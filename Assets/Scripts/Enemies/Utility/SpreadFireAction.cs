@@ -14,13 +14,14 @@ public class SpreadFireAction : EnemyAction
 
     public override float Score()
     {
-        if (TryGlitchScore("SpreadFire", out float g)) return g;
-        if (!Known(loseTargetTime)) return 0f;
-        if (!perception.IsInViewCone(ThreatPoint())) return 0f;
-
-        float rangeOk = Considerations.InRange(DistanceToTarget(), weapon.range * 0.5f, weapon.range * 0.5f);
-        float uncertain = uncertaintyWeight * (1f - Certainty());
-        return weight * (Sees ? 0.3f : 0.6f) * rangeOk + uncertain;
+        float emergent = 0f;
+        if (Known(loseTargetTime) && perception.IsInViewCone(ThreatPoint()))
+        {
+            float rangeOk = Considerations.InRange(DistanceToTarget(), weapon.range * 0.5f, weapon.range * 0.5f);
+            float uncertain = uncertaintyWeight * (1f - Certainty());
+            emergent = weight * (Sees ? 0.3f : 0.6f) * rangeOk + uncertain;
+        }
+        return emergent + GlitchBonus("SpreadFire");
     }
 
     public override void OnEnter()

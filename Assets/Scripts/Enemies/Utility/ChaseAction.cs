@@ -14,12 +14,12 @@ public class ChaseAction : EnemyAction
 
     public override float Score()
     {
-        if (TryGlitchScore("Chase", out float g)) return g;
-        if (!Known(loseTargetTime)) return 0f;
-        if (!Sees) return weight * 0.7f;
-
-        float beyond = Considerations.Linear((DistanceToTarget() - attackRange) / Mathf.Max(1f, attackRange));
-        return weight * beyond;
+        float emergent = 0f;
+        if (Known(loseTargetTime))
+            emergent = !Sees
+                ? weight * 0.7f
+                : weight * Considerations.Linear((DistanceToTarget() - attackRange) / Mathf.Max(1f, attackRange));
+        return emergent + GlitchBonus("Chase");
     }
 
     public override void Execute()

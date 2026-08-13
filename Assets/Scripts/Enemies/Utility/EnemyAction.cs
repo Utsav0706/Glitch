@@ -31,15 +31,11 @@ public abstract class EnemyAction : UtilityAction
         return basePos + Vector3.up * 1.4f;
     }
 
-    protected bool TryGlitchScore(string key, out float score)
+    protected float GlitchBonus(string key)
     {
         if (GlitchEvents.IsActive && GlitchEvents.ActiveType != GlitchType.PlayerDuplicate)
-        {
-            score = GlitchScoreTable.Get(GlitchEvents.ActiveType, key);
-            return true;
-        }
-        score = 0f;
-        return false;
+            return GlitchScoreTable.Get(GlitchEvents.ActiveType, key) / 100f;
+        return 0f;
     }
 
     protected float Certainty()

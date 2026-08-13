@@ -11,6 +11,8 @@ public class EnemyWeaponController : MonoBehaviour
     public MuzzleFlash muzzle;
     public Color shotColor = Color.clear;
 
+    public float DamageDealt { get; private set; }
+
     float nextShot;
 
     void Awake()
@@ -53,7 +55,11 @@ public class EnemyWeaponController : MonoBehaviour
         {
             endPoint = hit.point;
             Health h = hit.collider.GetComponentInParent<Health>();
-            if (h != null) h.TakeDamage(damage);
+            if (h != null)
+            {
+                h.TakeDamage(damage);
+                if (h.CompareTag("Player")) DamageDealt += damage;
+            }
         }
 
         Vector3 from = muzzle != null ? muzzle.transform.position : origin;

@@ -17,6 +17,8 @@ public class UtilityBrain
     public IReadOnlyList<UtilityAction> Actions => actions;
     public UtilityAction Current => current;
     public string CurrentName => current != null ? current.Name : "None";
+    public float TopScore { get; private set; }
+    public float SecondScore { get; private set; }
 
     public void Add(UtilityAction action)
     {
@@ -38,16 +40,25 @@ public class UtilityBrain
     {
         UtilityAction best = null;
         float bestScore = float.NegativeInfinity;
+        float secondScore = float.NegativeInfinity;
 
         for (int i = 0; i < actions.Count; i++)
         {
             float score = actions[i].Evaluate();
             if (score > bestScore)
             {
+                secondScore = bestScore;
                 bestScore = score;
                 best = actions[i];
             }
+            else if (score > secondScore)
+            {
+                secondScore = score;
+            }
         }
+
+        TopScore = bestScore;
+        SecondScore = float.IsNegativeInfinity(secondScore) ? bestScore : secondScore;
 
         if (best != current)
         {

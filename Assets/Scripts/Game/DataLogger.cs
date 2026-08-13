@@ -6,12 +6,13 @@ using UnityEngine;
 
 public class DataLogger : MonoBehaviour
 {
-    public float sampleInterval = 0.5f;
+    public float sampleInterval = 1f;
 
-    const string Header = "time,enemyId,aiType,action,activeGlitch,health,distToPlayer,canSeePlayer";
+    const string Header = "time,enemyId,aiType,action,activeGlitch,health,distToPlayer,canSeePlayer,playerHealth,damageDealt,topUtilityScore,secondScore,seed";
 
     StreamWriter writer;
     string path;
+    int seed;
     float startTime;
     float nextSample;
     Transform player;
@@ -26,6 +27,8 @@ public class DataLogger : MonoBehaviour
 
     void Start()
     {
+        seed = Environment.TickCount & 0x7fffffff;
+        UnityEngine.Random.InitState(seed);
         startTime = Time.time;
         OpenFile();
     }
@@ -40,7 +43,7 @@ public class DataLogger : MonoBehaviour
             writer = new StreamWriter(path, false, Encoding.UTF8);
             writer.WriteLine(Header);
             writer.Flush();
-            Debug.Log("[DataLogger] Session CSV: " + path);
+            Debug.Log("[DataLogger] Session CSV: " + path + "  (seed " + seed + ")");
         }
         catch (Exception ex)
         {
@@ -68,36 +71,46 @@ public class DataLogger : MonoBehaviour
         string glitch = GlitchEvents.IsActive ? GlitchEvents.ActiveType.ToString() : "None";
 
         if (playerHealth != null)
-            WriteRow(t, "Player", "Player", "-", glitch, playerHealth.Normalized, 0f, false, true);
+            Row(t, "Player", "Player", "-", glitch, F2(playerHealth.Normalized), "", false, "", "", "");
 
         foreach (FSMEnemy e in FindObjectsByType<FSMEnemy>(FindObjectsSortMode.None))
-            WriteEnemy(t, e, "FSM", e.IsDead ? "Dead" : e.StateName, glitch, e.Perception);
+            WriteEnemy(t, e, "FSM", e.IsDead ? "Dead" : e.StateName, glitch, e.Perception, null);
 
         foreach (UtilityEnemy e in FindObjectsByType<UtilityEnemy>(FindObjectsSortMode.None))
-            WriteEnemy(t, e, "Utility", e.IsDead ? "Dead" : e.Brain.CurrentName, glitch, e.Perception);
+            WriteEnemy(t, e, "Utility", e.IsDead ? "Dead" : e.Brain.CurrentName, glitch, e.Perception, e.Brain);
 
         writer.Flush();
     }
 
-    void WriteEnemy(float t, EnemyBase e, string ai, string action, string glitch, EnemyPerception perc)
+    void WriteEnemy(float t, EnemyBase e, string ai, string action, string glitch, EnemyPerception perc, UtilityBrain brain)
     {
         float dist = player != null ? Vector3.Distance(e.transform.position, player.position) : -1f;
         bool sees = perc != null && perc.CanSeeTarget;
-        WriteRow(t, e.name, ai, action, glitch, e.HealthNormalized, dist, sees, false);
+
+        EnemyWeaponController weapon = e.GetComponent<EnemyWeaponController>();
+        string dmg = weapon != null ? ((int)weapon.DamageDealt).ToString(CultureInfo.InvariantCulture) : "";
+        string top = brain != null ? F3(brain.TopScore) : "";
+        string second = brain != null ? F3(brain.SecondScore) : "";
+
+        Row(t, e.name, ai, action, glitch,
+            F2(e.HealthNormalized),
+            dist >= 0f ? dist.ToString("F1", CultureInfo.InvariantCulture) : "",
+            sees, dmg, top, second);
     }
 
-    void WriteRow(float t, string id, string ai, string action, string glitch, float health, float dist, bool sees, bool distNA)
+    void Row(float t, string id, string ai, string action, string glitch, string health, string dist, bool sees, string dmg, string top, string second)
     {
+        string ph = playerHealth != null ? F2(playerHealth.Normalized) : "";
         writer.WriteLine(string.Join(",",
             t.ToString("F2", CultureInfo.InvariantCulture),
-            Csv(id),
-            ai,
-            Csv(action),
-            glitch,
-            health.ToString("F2", CultureInfo.InvariantCulture),
-            distNA ? "" : dist.ToString("F1", CultureInfo.InvariantCulture),
-            sees ? "1" : "0"));
+            Csv(id), ai, Csv(action), glitch,
+            health, dist, sees ? "1" : "0",
+            ph, dmg, top, second,
+            seed.ToString(CultureInfo.InvariantCulture)));
     }
+
+    static string F2(float v) => v.ToString("F2", CultureInfo.InvariantCulture);
+    static string F3(float v) => v.ToString("F3", CultureInfo.InvariantCulture);
 
     string Csv(string s)
     {

@@ -32,6 +32,7 @@ public class UtilityEnemy : EnemyBase
         Brain.Add(new SpreadFireAction(this, Perception, Weapon));
         Brain.Add(new RetreatAction(this, Perception, Weapon));
         Brain.Add(new FreezeAction(this, Perception, Weapon));
+        Brain.Add(new PatrolAction(this, Perception, Weapon));
     }
 
     protected override void OnEnable()

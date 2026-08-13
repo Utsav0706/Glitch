@@ -15,9 +15,8 @@ public class RepositionAction : EnemyAction
 
     public override float Score()
     {
-        if (TryGlitchScore("Reposition", out float g)) return g;
-        if (!Known(loseTargetTime)) return 0f;
-        return weight * (Sees ? 0.25f : 0.8f);
+        float emergent = Known(loseTargetTime) ? weight * (Sees ? 0.25f : 0.8f) : 0f;
+        return emergent + GlitchBonus("Reposition");
     }
 
     public override void OnEnter()
