@@ -36,7 +36,12 @@ Across 13 experiment sessions this produced **390 agent-runs**, analysed in Pyth
 
 Utility AI agents deployed a significantly wider behavioural repertoire than the FSM baseline. Where FSM agents collapsed toward a narrow set of states once their environmental assumptions were broken, Utility AI agents continued to select across a broader range of actions under the same conditions.
 
-> **TODO before you publish this:** replace this line with the two or three headline figures from Chapter 5 of the report — e.g. mean distinct actions per run for each group, and the significance test result. The claim above is true but a reader will trust a number more than an adjective.
+1.	Utility AI deployed a significantly wider behavioural repertoire than the FSM overall (p = 0.004) and under four of five glitch conditions (p < 0.001).
+2.	The largest effect was under Enemy Duplicate, driven by a repositioning behaviour deployed almost exclusively in that condition and traceable to its scoring function.
+3.	The architectures did not differ significantly in switching frequency, entropy or dominant behaviour share.
+4.	They did not differ significantly in damage dealt, so the repertoire advantage did not cost combat effectiveness.
+5.	Utility agents died slightly more often (49.2% against 44.1%).l
+
 
 ## A defect worth documenting
 
