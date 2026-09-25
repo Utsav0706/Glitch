@@ -55,7 +55,7 @@ public class HUD : MonoBehaviour
         Rect g = new Rect(pad, yGlitch, barW, barH);
         Fill(g, 1f, new Color(0f, 0f, 0f, 0.6f));
         Frame(g, new Color(0.8f, 0.2f, 0.9f, 0.7f));
-        GUI.Label(new Rect(g.x + 8f, g.y, barW, barH), "placeholder", label);
+        GUI.Label(new Rect(g.x + 8f, g.y, barW, barH), "UV", label);
 
         if (shoot != null)
         {
